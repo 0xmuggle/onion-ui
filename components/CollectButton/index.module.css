@@ -1,0 +1,11 @@
+.collectModal {
+  .content {
+    @apply space-y-2;
+    button {
+      @apply w-full;
+    }
+  }
+  .tip {
+    @apply text-center text-red-500 text-sm pt-4;
+  }
+}

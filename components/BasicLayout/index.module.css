@@ -1,0 +1,6 @@
+.basic {
+  @apply flex flex-col min-h-screen;
+  main {
+    flex: 1;
+  }
+}

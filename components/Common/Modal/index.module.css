@@ -1,0 +1,12 @@
+.modalBox {
+  > div {
+    @apply relative pt-12 p-0;
+    > label {
+      @apply absolute z-20 right-4 top-4 btn btn-circle w-[20px] h-[20px] min-h-[20px];
+    }
+    .title {
+      @apply border-b z-10 text-lg font-bold absolute top-0 left-0 right-0 px-6 pt-3 pb-2;
+    }
+  }
+
+}

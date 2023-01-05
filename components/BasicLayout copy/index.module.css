@@ -1,0 +1,17 @@
+.basic {
+  @apply drawer;
+  .content {
+    @apply flex flex-col min-h-screen;
+    > main {
+      flex: 1;
+    }
+  }
+}
+
+.menuTitle {
+  :global {
+    .menu-title ~ li {
+      @apply pl-4;
+    }
+  }
+}
