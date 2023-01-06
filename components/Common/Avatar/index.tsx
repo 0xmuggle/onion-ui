@@ -1,5 +1,5 @@
 import { createAvatar } from "@dicebear/avatars";
-import * as style from "@dicebear/avatars-jdenticon-sprites";
+import * as style from "@dicebear/avatars-bottts-sprites";
 
 interface Props {
   className?: string;

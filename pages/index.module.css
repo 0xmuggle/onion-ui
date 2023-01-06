@@ -1,14 +1,6 @@
-.home {
-  @apply py-10 relative;
-  form {
-    @apply w-1/2 mx-auto;
-  }
-  h1 {
-    @apply text-[10px];
-  }
-  .bg {
-    @apply absolute w-screen h-full -top-[64px];
-    background: url(https://images.unsplash.com/photo-1554629947-334ff61d85dc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop) no-repeat;
-    background-size: cover;
+.search {
+  @apply relative mx-auto px-4 max-w-3xl;
+  .icon {
+    @apply absolute right-8 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary;
   }
 }
