@@ -1,35 +1,17 @@
 const Footer = () => (
   <footer className="body-font relative z-20 text-gray-600">
     <div className="bg-gray-100">
-      <div className="container mx-auto flex flex-col items-center px-5 py-6 sm:flex-row">
-        <a className="title-font flex items-center justify-center font-medium text-gray-900 md:justify-start">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            className="h-10 w-10 rounded-full bg-indigo-500 p-2 text-white"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-          </svg>
-          <span className="ml-3 text-xl">Tailblocks</span>
-        </a>
-        <p className="mt-4 text-sm text-gray-500 sm:ml-6 sm:mt-0">
-          © 2020 Tailblocks —
-          <a
-            href="https://twitter.com/knyttneve"
-            rel="noopener noreferrer"
-            className="ml-1 text-gray-600"
-            target="_blank"
-          >
-            @knyttneve
-          </a>
+      <div className="container mx-auto flex flex-col items-center py-6 sm:flex-row">
+        <p className="mt-4 text-sm text-gray-500">
+          © {new Date().getFullYear()} Onion
         </p>
         <span className="mt-4 inline-flex justify-center sm:ml-auto sm:mt-0 sm:justify-start">
-          <a className="ml-3 text-gray-500">
+          <a
+            className="ml-3 text-gray-500 hover:text-primary"
+            href="https://twitter.com/0xKrystal"
+            target="_blank"
+            rel="noreferrer"
+          >
             <svg
               fill="currentColor"
               stroke-linecap="round"

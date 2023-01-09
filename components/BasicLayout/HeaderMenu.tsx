@@ -1,3 +1,4 @@
+import { StarIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Fragment } from "react";
 export interface MenuItem {
@@ -24,7 +25,10 @@ const Menu = ({ menus, className }: Props) => {
     if (menu.onClick) {
       return (
         <li onClick={menu.onClick}>
-          <a>{menu.label}</a>
+          <a className="!gap-1 !bg-transparent hover:text-primary">
+            <StarIcon width={20} />
+            {menu.label}
+          </a>
         </li>
       );
     }

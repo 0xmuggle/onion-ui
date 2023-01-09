@@ -1,4 +1,4 @@
-import { isPlainObject } from "lodash";
+import { isPlainObject, slice } from "lodash";
 import ethers from "ethers";
 
 /**
@@ -25,3 +25,6 @@ export const isServer = () => typeof window === "undefined";
 
 export const sleep = (delay: number = 300) =>
   new Promise((resolve, reject) => setTimeout(() => resolve, delay));
+
+export const hideStr = (str: string, len = 4) =>
+  str.slice(0, 4) + "..." + str.slice(str.length - len);
