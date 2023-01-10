@@ -5,26 +5,13 @@ import { MagnifyingGlassIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";
 
 const Search = ({ value, onChange }: any) => {
-  const { push, query } = useRouter();
   const [address, setAddress] = useState(value);
   const [loading, setLoading] = useState(false);
 
   const doChange = async () => {
-    let addr = address;
-    if (!addr || loading) return;
+    if (!address || loading) return;
     setLoading(true);
-    if (addr.endsWith(".eth")) {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "https://mainnet.infura.io/v3/5e121bf717404855950bfe9831bfd4b1"
-      );
-      addr = await provider.resolveName(addr);
-    }
-    if (!ethers.utils.isAddress(addr)) {
-      toast.warn("Address is invalid.");
-    } else {
-      push(`/${addr}`);
-      await onChange?.(addr, address);
-    }
+    await onChange?.(address.toLowerCase());
     setLoading(false);
   };
 
@@ -47,7 +34,7 @@ const Search = ({ value, onChange }: any) => {
     <div className="relative mx-auto max-w-3xl">
       <input
         type="text"
-        placeholder="Ether Adress"
+        placeholder="输入ETH地址或者ENS"
         className="input input-bordered w-full"
         value={address}
         onChange={doChangeAddress}

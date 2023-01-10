@@ -4,7 +4,7 @@ import BN from "bignumber.js";
 
 // BUG 0xee3b8af0874416cd5b643ade0f34b3d51be1deb3
 
-const zeroAddress = "0x0000000000000000000000000000000000000000";
+export const zeroAddress = "0x0000000000000000000000000000000000000000";
 const ETHERESCAN_API_KEY = "ZTCEJ9279MFUH58P6ZAVRQTZ2FJAF5K15G";
 const chainApi: any = {
   ether: "https://api.etherscan.io/api",
@@ -16,11 +16,11 @@ const ERC20s = [
 
 const setItem = (key: string, value: any) => {
   localStorage.setItem(key, JSON.stringify(value));
-}
+};
 
 const getItem = (key: string, defaultValue: string) => {
   return JSON.parse(localStorage.getItem(key) || defaultValue);
-}
+};
 
 const query = async (params = {}, chain = "ether") => {
   const { data } = await axios.get(`${chainApi[chain]}`, {
@@ -54,7 +54,6 @@ export const queryAll = async (params = {}, chain = "ether") => {
   return list;
 };
 
-
 const queryERC20 = async (address: string, startblock = 1) => {
   let erc: any = [];
   for (let i = 0; i < ERC20s.length; i++) {
@@ -80,28 +79,23 @@ const initValue = {
   erc20: [],
   txs: [],
   intxs: [],
-}
+};
 const queryData = async (address: string) => {
-  const { 
-    nft721Block, 
-    txsBlock, 
-    intxsBlock, 
-    erc20Block, 
-    ...cacheData 
-  } = getItem(address, JSON.stringify(initValue));
+  const { nft721Block, txsBlock, intxsBlock, erc20Block, ...cacheData } =
+    getItem(address, JSON.stringify(initValue));
   // 查询721
   const nfts721 = await queryAll({
     address,
     module: "account",
     action: "tokennfttx",
-    startblock: nft721Block + 1, 
+    startblock: nft721Block + 1,
   });
   // 查询普通交易
   const txs = await queryAll({
     address,
     module: "account",
     action: "txlist",
-    startblock: txsBlock + 1, 
+    startblock: txsBlock + 1,
   });
 
   // 查询内联交易
@@ -109,14 +103,15 @@ const queryData = async (address: string) => {
     address,
     module: "account",
     action: "txlistinternal",
-    startblock: intxsBlock + 1, 
+    startblock: intxsBlock + 1,
   });
 
   // 查询ERC20
   const erc20 = await queryERC20(address, erc20Block + 1);
 
   const result = {
-    nft721Block: nfts721.length > 0 ? Number(nfts721[0].blockNumber) : nft721Block,
+    nft721Block:
+      nfts721.length > 0 ? Number(nfts721[0].blockNumber) : nft721Block,
     txsBlock: txs.length > 0 ? Number(txs[0].blockNumber) : txsBlock,
     intxsBlock: intxs.length > 0 ? Number(intxs[0].blockNumber) : intxsBlock,
     erc20Block: erc20.length > 0 ? Number(erc20[0].blockNumber) : erc20Block,
@@ -124,10 +119,10 @@ const queryData = async (address: string) => {
     nfts721: cacheData.nfts721.concat(nfts721),
     intxs: cacheData.intxs.concat(intxs),
     txs: cacheData.txs.concat(txs),
-  }
+  };
   // setItem(address, result);
   return result;
-}
+};
 
 const getNftIn = (item: any, erc: any, count = 1) => {
   const { tokenID, contractAddress: contract, from, hash } = item;
@@ -147,31 +142,32 @@ const getNftIn = (item: any, erc: any, count = 1) => {
     outGasPrice: 0, // 转出时消耗的gas
     outGasUsed: 0,
   };
-  if(isEmpty(erc)) { // nft inType transfer;
+  if (isEmpty(erc)) {
+    // nft inType transfer;
     return nft;
   }
   const gasUsed = erc.gasUsed / count;
   nft.inValue = erc.value / count;
 
-  if(!erc.isOwner && erc.value > 0) {
+  if (!erc.isOwner && erc.value > 0) {
     nft.inType = "offer";
     return nft;
   }
   nft.inGasPrice = erc.gasPrice;
   nft.inGasUsed = gasUsed;
-  nft.inType = from === zeroAddress ? 'mint' : 'buy';
+  nft.inType = from === zeroAddress ? "mint" : "buy";
   return nft;
-}
+};
 
 const getNftOut = (item: any, erc: any, count = 1) => {
   const { hash, timeStamp, to } = item;
   const nft: any = {
-    type: 'out',
+    type: "out",
     outHash: hash,
     outTimeStamp: timeStamp,
   };
-  if(isEmpty(erc)) {
-    nft.outType = 'reclaim';
+  if (isEmpty(erc)) {
+    nft.outType = "reclaim";
     return nft;
   }
   const value = erc.value / count;
@@ -186,32 +182,27 @@ const getNftOut = (item: any, erc: any, count = 1) => {
   if (erc.isOwner && erc.value <= 0) {
     nft.outGasPrice = erc.gasPrice;
     nft.outGasUsed = gasUsed;
-    if(to === zeroAddress) {
+    if (to === zeroAddress) {
       nft.outType = "burn";
     } else {
       nft.outType = "transfer";
     }
     return nft;
   }
-  if(!erc.isOwner && erc.value > 0) {
+  if (!erc.isOwner && erc.value > 0) {
     nft.outType = "sell";
     nft.outValue = value;
   }
   return nft;
-}
+};
 
 const queryNfts = async (address: string) => {
-  const { 
-    nfts721,
-    erc20,
-    intxs,
-    txs,
-  } = await queryData(address);
-  
+  const { nfts721, erc20, intxs, txs } = await queryData(address);
+
   const intxsMap: any = {};
   intxs.forEach((item: any) => {
     const { hash, value, from, to } = item;
-    if(intxsMap[hash]) {
+    if (intxsMap[hash]) {
       intxsMap[hash].value = new BN(intxsMap[hash].value)
         .plus(value)
         .toString();
@@ -220,13 +211,13 @@ const queryNfts = async (address: string) => {
     }
   });
   // 普通交易
-  let balanceMap: any = { };
+  let balanceMap: any = {};
   txs.forEach((item: any) => {
     const { hash } = item;
-    if(!balanceMap[hash]) {
+    if (!balanceMap[hash]) {
       balanceMap[hash] = item;
     }
-    if(intxsMap[hash]) {
+    if (intxsMap[hash]) {
       balanceMap[hash].value = new BN(balanceMap[hash].value)
         .minus(intxsMap[hash].value)
         .toString();
@@ -260,7 +251,7 @@ const queryNfts = async (address: string) => {
   const nftCountMap: Record<string, number> = {};
   nfts721.forEach((item: any) => {
     const { hash } = item;
-    if(!nftCountMap[hash]) {
+    if (!nftCountMap[hash]) {
       nftCountMap[hash] = 0;
     }
     nftCountMap[hash] += 1;
@@ -282,7 +273,7 @@ const queryNfts = async (address: string) => {
       );
       nfts[index] = {
         ...nfts[index],
-        ...getNftOut(item, erc, nftCountMap[hash])
+        ...getNftOut(item, erc, nftCountMap[hash]),
       };
       nftMap[inKey] = false;
       nftMap[outKey] = true;
@@ -318,13 +309,14 @@ export const flipsDtatistics = (data: any) => {
       const inAmount = new BN(item.inValue);
       const outAmount = new BN(item.outValue);
       const flipsAmount = outAmount.minus(inAmount).minus(outGas).minus(inGas);
-      if(item.outType !== 'transfer') {
-        if (Number(flipsAmount) > 0) {
-          winFlips += 1;
-        } else {
-          loseFlips += 1;
-        }
+      //
+      // if(item.outType !== 'transfer') {
+      if (Number(flipsAmount) > 0) {
+        winFlips += 1;
+      } else {
+        loseFlips += 1;
       }
+      // }
       totalSpend = totalSpend.plus(outGas).plus(inGas).plus(item.inValue);
       totalRecive = totalRecive.plus(outAmount).minus(outGas);
       return {
@@ -336,7 +328,7 @@ export const flipsDtatistics = (data: any) => {
         flipsAmount,
       };
     })
-    .sort((pre: any, next: any) => pre.outTimeStamp - next.outTimeStamp)
+    .sort((pre: any, next: any) => pre.outTimeStamp - next.outTimeStamp);
   return {
     winFlips,
     loseFlips,
