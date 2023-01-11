@@ -5,5 +5,12 @@
 @layer components {
   .content {
     @apply max-w-screen-2xl mx-auto px-4 md:px-0;
+    .table :where(th, td) {
+      @apply px-4 py-2;
+    }
   }
+}
+
+a:hover {
+  @apply text-purple-500;
 }

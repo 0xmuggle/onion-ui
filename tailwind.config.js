@@ -8,4 +8,13 @@ module.exports = {
 		extend: {},
 	},
 	plugins: [require("daisyui")],
+	// daisyui: {
+  //   themes: [
+  //     {
+	// 			mytheme: {
+	// 				"primary": "#f3c9ff",
+	// 			},
+	// 		},
+  //   ],
+  // }
 }

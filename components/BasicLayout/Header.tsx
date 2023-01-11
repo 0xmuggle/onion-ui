@@ -13,11 +13,14 @@ const menus: MenuItem[] = [
   },
 ];
 const Header = () => (
-  <header className="sticky top-0 z-20 bg-white shadow">
+  <header className="sticky top-0 z-30 bg-white shadow">
     <div className="content navbar px-4">
-      <div className="navbar-center text-2xl font-bold text-primary md:navbar-start">
+      <div className="navbar-center font-bold text-primary md:navbar-start">
         <Link href="/">
-          <a>Onion</a>
+          <a className="flex items-center gap-x-2 text-xl">
+            <img width={40} src="/favicon.ico" alt="Onion" />
+            Onion
+          </a>
         </Link>
       </div>
       <div className="navbar-end">

@@ -1,128 +1,8 @@
-import axios from "axios";
-import { isEmpty, keyBy } from "lodash";
+import { isEmpty, orderBy } from "lodash";
 import BN from "bignumber.js";
-
-// BUG 0xee3b8af0874416cd5b643ade0f34b3d51be1deb3
+import { queryCacheData, queryData } from "./tool";
 
 export const zeroAddress = "0x0000000000000000000000000000000000000000";
-const ETHERESCAN_API_KEY = "ZTCEJ9279MFUH58P6ZAVRQTZ2FJAF5K15G";
-const chainApi: any = {
-  ether: "https://api.etherscan.io/api",
-};
-const ERC20s = [
-  "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-  "0x0000000000a39bb272e79075ade125fd351887ac",
-];
-
-const setItem = (key: string, value: any) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
-const getItem = (key: string, defaultValue: string) => {
-  return JSON.parse(localStorage.getItem(key) || defaultValue);
-};
-
-const query = async (params = {}, chain = "ether") => {
-  const { data } = await axios.get(`${chainApi[chain]}`, {
-    timeout: 60 * 1000,
-    params: {
-      offset: 10000,
-      sort: "asc",
-      ...params,
-      apiKey: ETHERESCAN_API_KEY,
-    },
-  });
-  return data.result;
-};
-
-export const queryAll = async (params = {}, chain = "ether") => {
-  let flag = true;
-  let page = 0;
-  let list: any = [];
-  do {
-    page += 1;
-    const data = await query(
-      {
-        ...params,
-        page,
-      },
-      chain
-    );
-    flag = data.length === 10000;
-    list = list.concat(data);
-  } while (flag);
-  return list;
-};
-
-const queryERC20 = async (address: string, startblock = 1) => {
-  let erc: any = [];
-  for (let i = 0; i < ERC20s.length; i++) {
-    const contractaddress = ERC20s[i];
-    const erc20 = await queryAll({
-      address,
-      contractaddress,
-      module: "account",
-      action: "tokentx",
-      startblock,
-    });
-    erc = erc.concat(erc20);
-  }
-  return erc;
-};
-
-const initValue = {
-  nft721Block: 0,
-  txsBlock: 0,
-  intxsBlock: 0,
-  erc20Block: 0,
-  nfts721: [],
-  erc20: [],
-  txs: [],
-  intxs: [],
-};
-const queryData = async (address: string) => {
-  const { nft721Block, txsBlock, intxsBlock, erc20Block, ...cacheData } =
-    getItem(address, JSON.stringify(initValue));
-  // 查询721
-  const nfts721 = await queryAll({
-    address,
-    module: "account",
-    action: "tokennfttx",
-    startblock: nft721Block + 1,
-  });
-  // 查询普通交易
-  const txs = await queryAll({
-    address,
-    module: "account",
-    action: "txlist",
-    startblock: txsBlock + 1,
-  });
-
-  // 查询内联交易
-  const intxs = await queryAll({
-    address,
-    module: "account",
-    action: "txlistinternal",
-    startblock: intxsBlock + 1,
-  });
-
-  // 查询ERC20
-  const erc20 = await queryERC20(address, erc20Block + 1);
-
-  const result = {
-    nft721Block:
-      nfts721.length > 0 ? Number(nfts721[0].blockNumber) : nft721Block,
-    txsBlock: txs.length > 0 ? Number(txs[0].blockNumber) : txsBlock,
-    intxsBlock: intxs.length > 0 ? Number(intxs[0].blockNumber) : intxsBlock,
-    erc20Block: erc20.length > 0 ? Number(erc20[0].blockNumber) : erc20Block,
-    erc20: cacheData.erc20.concat(erc20),
-    nfts721: cacheData.nfts721.concat(nfts721),
-    intxs: cacheData.intxs.concat(intxs),
-    txs: cacheData.txs.concat(txs),
-  };
-  // setItem(address, result);
-  return result;
-};
 
 const getNftIn = (item: any, erc: any, count = 1) => {
   const { tokenID, contractAddress: contract, from, hash } = item;
@@ -132,12 +12,12 @@ const getNftIn = (item: any, erc: any, count = 1) => {
     tokenName: item.tokenName,
     inHash: hash, // 转入时hash
     type: "in",
-    inType: "transfer",
+    inType: "transfer in",
     inValue: 0, // 转入时消耗的ETH
     inGasPrice: 0, // 转入时消耗的gas
     inGasUsed: 0,
     inTimeStamp: item.timeStamp, // 转入时时间
-    outType: "transfer",
+    outType: "transfer out",
     outValue: 0, // 转出时消耗的ETH
     outGasPrice: 0, // 转出时消耗的gas
     outGasUsed: 0,
@@ -150,7 +30,7 @@ const getNftIn = (item: any, erc: any, count = 1) => {
   nft.inValue = erc.value / count;
 
   if (!erc.isOwner && erc.value > 0) {
-    nft.inType = "offer";
+    nft.inType = "buy offer";
     return nft;
   }
   nft.inGasPrice = erc.gasPrice;
@@ -162,7 +42,7 @@ const getNftIn = (item: any, erc: any, count = 1) => {
 const getNftOut = (item: any, erc: any, count = 1) => {
   const { hash, timeStamp, to } = item;
   const nft: any = {
-    type: "out",
+    type: "transfer out",
     outHash: hash,
     outTimeStamp: timeStamp,
   };
@@ -173,7 +53,7 @@ const getNftOut = (item: any, erc: any, count = 1) => {
   const value = erc.value / count;
   const gasUsed = erc.gasUsed / count;
   if (erc.isOwner && erc.value > 0) {
-    nft.outType = "offer sell";
+    nft.outType = "sell offer";
     nft.outValue = value;
     nft.outGasPrice = erc.gasPrice;
     nft.outGasUsed = gasUsed;
@@ -185,7 +65,7 @@ const getNftOut = (item: any, erc: any, count = 1) => {
     if (to === zeroAddress) {
       nft.outType = "burn";
     } else {
-      nft.outType = "transfer";
+      nft.outType = "transfer out";
     }
     return nft;
   }
@@ -282,13 +162,8 @@ const queryNfts = async (address: string) => {
   return nfts;
 };
 
-const flips = async (address: string) => {
-  const nfts = await queryNfts(address);
-  return nfts;
-};
-
 export const calcAmount = (value: any) => {
-  if (BN.isBigNumber(value)) {
+  if (BN.isBigNumber(value) && !value.eq(0)) {
     return value.div(1e18).toFixed(3);
   }
   return 0;
@@ -297,46 +172,58 @@ export const calcAmount = (value: any) => {
 export const flipsDtatistics = (data: any) => {
   let winFlips = 0;
   let loseFlips = 0;
+  let cost = 0; // 有用nft数量
+  let costSpend = new BN(0); // 拥有nft的花费
   let totalSpend = new BN(0);
-  let totalRecive = new BN(0);
+  let totalProfits = new BN(0);
+  let transfer = 0; // 转出nft数量
 
   // 处理数据
-  const datas = data
-    .filter((item: any) => item.type === "out")
-    .map((item: any) => {
-      const inGas = new BN(item.inGasUsed * item.inGasPrice);
-      const outGas = new BN(item.outGasUsed * item.outGasPrice);
-      const inAmount = new BN(item.inValue);
-      const outAmount = new BN(item.outValue);
-      const flipsAmount = outAmount.minus(inAmount).minus(outGas).minus(inGas);
-      //
-      // if(item.outType !== 'transfer') {
-      if (Number(flipsAmount) > 0) {
+  const datas = data.map((item: any) => {
+    const inGas = new BN(item.inGasUsed).times(item.inGasPrice);
+    const outGas = new BN(item.outGasUsed).times(item.outGasPrice);
+    const inAmount = new BN(item.inValue);
+    const outAmount = new BN(item.outValue);
+
+    let flipsAmount = new BN(0);
+
+    totalSpend = totalSpend.plus(outGas).plus(inGas).plus(item.inValue);
+
+    if (item.type === "in") {
+      cost += 1;
+      costSpend = costSpend.plus(inAmount).plus(inGas);
+    } else if (item.type === "transfer") {
+      transfer += 1;
+      flipsAmount = flipsAmount.minus(outGas).minus(inGas);
+    } else {
+      flipsAmount = outAmount.minus(inAmount).minus(outGas).minus(inGas);
+      if (Number(flipsAmount) >= 0) {
         winFlips += 1;
       } else {
         loseFlips += 1;
       }
-      // }
-      totalSpend = totalSpend.plus(outGas).plus(inGas).plus(item.inValue);
-      totalRecive = totalRecive.plus(outAmount).minus(outGas);
-      return {
-        ...item,
-        inGas,
-        outGas,
-        inAmount,
-        outAmount,
-        flipsAmount,
-      };
-    })
-    .sort((pre: any, next: any) => pre.outTimeStamp - next.outTimeStamp);
+    }
+    totalProfits = totalProfits.plus(flipsAmount);
+
+    return {
+      ...item,
+      inGas,
+      outGas,
+      inAmount,
+      outAmount,
+      flipsAmount,
+    };
+  });
   return {
+    cost,
+    costSpend,
+    transfer,
     winFlips,
     loseFlips,
-    totalSpend,
-    totalRecive,
-    totalProfits: totalRecive.minus(totalSpend),
-    dataSources: datas,
+    totalSpend: totalSpend.minus(costSpend),
+    totalProfits,
+    dataSources: datas.reverse(),
   };
 };
 
-export default flips;
+export default queryNfts;
