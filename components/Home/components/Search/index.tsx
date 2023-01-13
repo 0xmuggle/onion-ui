@@ -10,7 +10,11 @@ const Search = ({ value, onChange }: any) => {
   const [loading, setLoading] = useState(false);
 
   const loadCache = () => {
-    setCaches(JSON.parse(localStorage.getItem("caches-addr") || "[]"));
+    setCaches(
+      JSON.parse(localStorage.getItem("caches-addr") || "[]").filter(
+        (item: any) => item
+      )
+    );
   };
 
   const doChange = async (val = address) => {

@@ -1,5 +1,4 @@
 import { getDefaultProvider } from "ethers";
-import { NftProvider, useNft } from "use-nft";
 import type { AppProps } from "next/app";
 import BasicLayout from "components/BasicLayout";
 import { ToastContainer } from "react-toastify";
@@ -24,11 +23,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content="NFT分析平台" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <NftProvider fetcher={["ethers", ethersConfig]}>
-        <BasicLayout>
-          <Component {...pageProps} />
-        </BasicLayout>
-      </NftProvider>
+      <BasicLayout>
+        <Component {...pageProps} />
+      </BasicLayout>
       <ToastContainer
         position="top-center"
         autoClose={5000}

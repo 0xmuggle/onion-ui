@@ -18,7 +18,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
   const changeVisible = (e: any) => {
     const nextFilter = {
       ...filter,
-      visible: e.target.checked,
+      visible: !e.target.checked,
     };
     setFilter(nextFilter);
     onChange?.(nextFilter);
@@ -48,7 +48,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
       <label className="swap">
         <input
           type="checkbox"
-          checked={filter.visible}
+          checked={!filter.visible}
           onChange={changeVisible}
         />
         <div className="swap-on">

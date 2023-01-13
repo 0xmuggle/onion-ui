@@ -69,7 +69,9 @@ const Home: NextPage = ({ query }: any) => {
             "https://rpc.ankr.com/eth"
           );
           addr = await provider.resolveName(address);
-          localStorage.setItem(address, addr);
+          if (addr) {
+            localStorage.setItem(address, addr);
+          }
         }
       }
       if (!ethers.utils.isAddress(addr)) {
@@ -93,6 +95,10 @@ const Home: NextPage = ({ query }: any) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setVisibleIn(false);
+  }, [id]);
 
   return (
     <main className="px-4">
