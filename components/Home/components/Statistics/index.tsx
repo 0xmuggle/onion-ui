@@ -1,43 +1,97 @@
-import { StarIcon } from "@heroicons/react/24/outline";
+import { ShareIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Avatar } from "components/Common";
-import { toast } from "react-toastify";
+import { isEmpty } from "lodash";
 import { calcAmount, zeroAddress } from "service/flips";
 import { hideStr } from "utils/utils";
 
-const StatisticsItem = ({ value = "-", children, className, loading }: any) => (
+const StatisticsItem = ({
+  value = "-",
+  subfix = false,
+  children,
+  className,
+  loading,
+}: any) => (
   <div className="text-center">
-    <div className={`${className} text-2xl font-bold`}>
+    <div className={`${className} text-xl font-bold`}>
       {loading ? "···" : value}
+      {subfix && <span className="pl-1 text-sm font-normal">ETH</span>}
     </div>
-    <div className={` text-sm text-gray-400`}>{children}</div>
+    <div className={` text-xs text-gray-400`}>{children}</div>
   </div>
 );
 
 const Statistics = ({
+  hideUser = false,
   loading,
   address,
   name,
+  cost,
+  costSpend,
   winFlips,
   loseFlips,
   totalSpend,
   totalProfits,
+  collections = [],
 }: any) => {
-  const totalProfit = calcAmount(totalProfits);
-  const doClick = () => {
-    toast.info("功能开发中，敬请期待...");
+  const getShareTxt = () => {
+    const shareTxt = `${name !== address ? name : hideStr(address)} 总购入了 ${
+      cost + winFlips + loseFlips
+    } 个${
+      isEmpty(collections) ? "" : ` “${collections.join("、")}” `
+    }NFT。 花费 ${calcAmount(totalSpend)} ETH，已实现盈亏 ${calcAmount(
+      totalProfits
+    )} ETH。当前仍持有 ${cost} 个NFT，持有成本 ${calcAmount(costSpend)} ETH。`;
+    return shareTxt;
   };
   return (
-    <div className="flex items-center rounded-xl border px-4 py-6 shadow">
-      <div className="flex items-center gap-2">
-        <Avatar size={64} avatar={loading ? zeroAddress : address} />
-        <div className="space-y-1">
-          <div>{loading ? "..." : name !== address ? name : "Unknown"}</div>
-          <div className="text-xs text-gray-400">
-            {loading ? "···" : hideStr(address)}
+    <div className="rounded-xl border p-6">
+      <div className="flex items-center gap-2 pb-4">
+        {!hideUser && (
+          <>
+            <Avatar size={48} avatar={loading ? zeroAddress : address} />
+            <a
+              target="_blank"
+              href={`https://opensea.io/account/${address}`}
+              className="flex-1 space-y-1"
+              rel="noreferrer"
+            >
+              <div>{loading ? "..." : name !== address ? name : "Unknown"}</div>
+              <div className="text-xs text-gray-400">
+                {loading ? "···" : hideStr(address)}
+              </div>
+            </a>
+          </>
+        )}
+        {!loading && (
+          <div
+            className="tooltip cursor-pointer text-left"
+            data-tip={getShareTxt()}
+          >
+            <a
+              className="text-blue-500"
+              target="_blank"
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                getShareTxt() + `#OnionNFT #Fliper ${location.href}`
+              )}`}
+              rel="noreferrer"
+            >
+              <ShareIcon width={20} />
+            </a>
           </div>
-        </div>
+        )}
       </div>
-      <div className="grid flex-1 grid-cols-4">
+      <div>
+        {!isEmpty(collections) && (
+          <div className="mb-4 flex flex-wrap gap-2 rounded-lg bg-gray-50 p-4">
+            {collections.map((item: any) => (
+              <div className="badge badge-outline badge-sm" key="item">
+                {item}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 border-b border-dotted pb-4">
         <StatisticsItem
           value={winFlips}
           className="text-green-500"
@@ -52,19 +106,24 @@ const Statistics = ({
         >
           亏损操作
         </StatisticsItem>
-        <StatisticsItem value={`${calcAmount(totalSpend)} E`} loading={loading}>
-          总花费
+        <StatisticsItem value={calcAmount(totalSpend)} loading={loading}>
+          总花费(ETH)
         </StatisticsItem>
-        <StatisticsItem value={`${totalProfit} E`} loading={loading}>
-          总盈收
+        <StatisticsItem value={calcAmount(totalProfits)} loading={loading}>
+          已实现盈亏(ETH)
         </StatisticsItem>
       </div>
-      <div className="pr-6">
-        <StarIcon
-          onClick={doClick}
-          className="cursor-pointer text-gray-600"
-          width={20}
-        />
+      <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 pt-4">
+        <StatisticsItem
+          value={cost}
+          className="text-blue-500"
+          loading={loading}
+        >
+          现持有NFT
+        </StatisticsItem>
+        <StatisticsItem value={calcAmount(costSpend)} loading={loading}>
+          持有成本(ETH)
+        </StatisticsItem>
       </div>
     </div>
   );

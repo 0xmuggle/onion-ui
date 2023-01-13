@@ -3,10 +3,12 @@ import { Table } from "components/Common";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { calcAmount } from "service/flips";
+import IconTip from "./IconTip";
+import LinkTip from "./LinkTip";
 
 const diffDuration = (start: string, end: string) => {
   const s = moment.unix(Number(start));
-  const e = moment.unix(Number(end));
+  const e = moment.unix(Number(end || moment().unix()));
   const d = e.diff(s, "days");
   const h = e.diff(s, "hours");
   const m = e.diff(s, "m");
@@ -19,15 +21,25 @@ const diffDuration = (start: string, end: string) => {
   return `${m} 分钟`;
 };
 
-const ListItem = ({ value, gas, type, ...props }: any) => (
-  <div>
+const ListItem = ({ value, hash, gas, type, ...props }: any) => (
+  <LinkTip value={hash}>
     <div {...props}>
-      <span className="font-bold">{calcAmount(value)}</span>
+      <span className="text-sm font-bold">{calcAmount(value)}</span>
       <span className="pl-1 text-xs">ETH</span>
+      {type && <IconTip type={type} />}
     </div>
-    {gas && <div className="text-xs text-gray-400">gas: {calcAmount(gas)}</div>}
-    {/* <div>{type}</div>   */}
-  </div>
+    {gas && (
+      <div className="flex items-center text-xs text-gray-400">
+        <img
+          alt="gas"
+          className="mr-1 align-middle"
+          src="/icons/gas.svg"
+          width={12}
+        />
+        <span>{calcAmount(gas)}</span>
+      </div>
+    )}
+  </LinkTip>
 );
 
 const SearchList = ({ list, loading }: any) => {
@@ -42,91 +54,98 @@ const SearchList = ({ list, loading }: any) => {
       label: "NFT",
       render: (_: any, item: any) => {
         return (
-          <a
-            href={`https://opensea.io/assets/${item.contract}/${item.tokenID}`}
-            target="_blank"
-            rel="noreferrer"
+          <LinkTip
+            className="text-sm"
+            type="opensea"
+            value={`${item.contract}/${item.tokenID}`}
           >
-            <div className="font-bold">{item.tokenName}</div>
-            <span className="inline-block max-w-[60px] truncate text-xs opacity-50 hover:text-primary">
+            <div className="text-sm">{item.tokenName}</div>
+            <div className="max-w-[100px] truncate text-xs opacity-50">
               #{item.tokenID}
-            </span>
-          </a>
+            </div>
+          </LinkTip>
         );
       },
     },
     {
       key: "inHash",
       label: "购入价",
-      render: (_: any, item: any) => {
-        return (
-          <a
-            href={`https://etherscan.io/tx/${item.inHash}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <ListItem
-              value={item.inAmount}
-              type={item.inType}
-              gas={item.inGas}
-            />
-          </a>
-        );
-      },
+      render: (_: any, item: any) => (
+        <ListItem
+          value={item.inAmount}
+          type={item.inType}
+          gas={item.inGas}
+          hash={item.inHash}
+        />
+      ),
     },
     {
       key: "outHash",
       label: "卖出价",
       render: (_: any, item: any) => {
+        if (item.type === "in") return "";
         return (
-          <a
-            href={`https://etherscan.io/tx/${item.outHash}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <ListItem
-              value={item.outAmount}
-              type={item.outType}
-              gas={item.outGas}
-            />
-          </a>
+          <ListItem
+            value={item.outAmount}
+            type={item.outType}
+            gas={item.outGas}
+            hash={item.outHash}
+          />
         );
       },
     },
     {
       key: "flipsAmount",
       label: "盈利",
-      render: (flipsAmount: any) => {
+      render: (flipsAmount: any, item: any) => {
+        if (item.type === "in") return "";
         return (
-          <ListItem
-            className={classNames({
+          <div
+            className={classNames("font-bold", {
               "text-red-500": flipsAmount < 0,
               "text-green-600": flipsAmount >= 0,
             })}
-            value={flipsAmount}
-          />
+          >
+            {calcAmount(flipsAmount)}{" "}
+            <span className="text-xs font-normal">ETH</span>
+          </div>
         );
       },
     },
     {
       key: "inTimeStamp",
       label: "持有时长",
-      render: (_: any, item: any) =>
-        diffDuration(item.inTimeStamp, item.outTimeStamp),
+      render: (_: any, item: any) => {
+        if (item.type === "in") return "";
+        return (
+          <div className="text-sm">
+            {diffDuration(item.inTimeStamp, item.outTimeStamp)}
+          </div>
+        );
+      },
       labelProps: {
-        className: "text-right text-sm",
+        className: "text-right",
       },
     },
     {
       key: "outTimeStamp",
       label: "卖出时间",
-      render: (outTimeStamp: any) =>
-        moment.unix(outTimeStamp).format("YYYY/MM/DD HH:mm"),
+      render: (outTimeStamp: any, item: any) => {
+        if (item.type === "in") return "";
+        return (
+          <div className="text-sm">
+            {moment.unix(outTimeStamp).format("YYYY/MM/DD HH:mm")}
+          </div>
+        );
+      },
       labelProps: {
-        className: "text-right text-sm",
+        className: "text-right",
       },
     },
   ];
+  useEffect(() => {
+    setPage(1);
+  }, [list]);
   return (
     <Table
       loading={loading}

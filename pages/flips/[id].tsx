@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import flips, { flipsDtatistics } from "service/flips";
-import { Search, Statistics, SearchList } from "components/Home";
-import { pick } from "lodash";
+import { Search, Statistics, SearchList, Filter } from "components/Home";
+import { isEmpty, pick, uniq } from "lodash";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
@@ -12,11 +12,17 @@ const Home: NextPage = ({ query }: any) => {
 
   const id = query.id.toLowerCase();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [list, setList] = useState([]);
+
+  const [visibleIn, setVisibleIn] = useState(false);
+
+  const [filters, setFilter] = useState([]);
 
   const [account, setAccount] = useState({
-    address: id,
-    name: id,
+    address: "",
+    name: "",
   });
 
   const [state, setState] = useState<any>({
@@ -27,9 +33,27 @@ const Home: NextPage = ({ query }: any) => {
     dataSources: [],
   });
 
+  const caclCollections = (data = list, cs: any = []) => {
+    setFilter(cs);
+    setState(
+      flipsDtatistics(
+        data.filter((item: any) => isEmpty(cs) || cs.includes(item.tokenName))
+      )
+    );
+  };
+
+  const doChangeCollections = ({ collections, visible }: any) => {
+    caclCollections(
+      list,
+      collections.map((item: any) => item.value)
+    );
+    setVisibleIn(visible);
+  };
+
   const loadData = async (address: string) => {
     try {
       setLoading(true);
+      setList([]);
       setState({
         winFlips: 0,
         loseFlips: 0,
@@ -39,17 +63,21 @@ const Home: NextPage = ({ query }: any) => {
       });
       let addr: any = address;
       if (address.endsWith(".eth")) {
-        const provider = new ethers.providers.JsonRpcProvider(
-          "https://mainnet.infura.io/v3/5e121bf717404855950bfe9831bfd4b1"
-        );
-        addr = await provider.resolveName(addr);
+        addr = localStorage.getItem(address);
+        if (!addr) {
+          const provider = new ethers.providers.JsonRpcProvider(
+            "https://rpc.ankr.com/eth"
+          );
+          addr = await provider.resolveName(address);
+          localStorage.setItem(address, addr);
+        }
       }
       if (!ethers.utils.isAddress(addr)) {
         toast.warn("Address is invalid.");
         setLoading(false);
         return;
       }
-      if (id !== addr) {
+      if (id !== address) {
         push(`/flips/${address}`);
       }
       setAccount({
@@ -57,7 +85,8 @@ const Home: NextPage = ({ query }: any) => {
         name: address,
       });
       const data = await flips(addr);
-      setState(flipsDtatistics(data));
+      setList(data);
+      caclCollections(data);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -68,24 +97,38 @@ const Home: NextPage = ({ query }: any) => {
   return (
     <main className="px-4">
       <div className="content mx-auto py-10">
-        <Search value={account.address} onChange={loadData} />
-        <div className="pt-8 pb-6">
-          <Statistics
-            loading={loading}
-            address={account.address}
-            name={account.name}
-            {...pick(state, [
-              "winFlips",
-              "loseFlips",
-              "totalSpend",
-              "totalProfits",
-            ])}
-          />
-        </div>
-        <SearchList
-          list={(state.dataSources || []).reverse()}
-          loading={loading}
+        <Search value={id} onChange={loadData} />
+        <Filter
+          address={account.address}
+          onChange={doChangeCollections}
+          collections={uniq(list.map((item: any) => item.tokenName))}
         />
+        <div className="flex items-start gap-4">
+          <div className="flex-1 space-y-4">
+            <SearchList
+              list={(state.dataSources || []).filter(
+                (item: any) => visibleIn || item.type !== "in"
+              )}
+              loading={loading}
+            />
+          </div>
+          <div className="sticky top-[80px] w-[300px]">
+            <Statistics
+              collections={filters}
+              loading={loading}
+              address={account.address}
+              name={account.name}
+              {...pick(state, [
+                "cost",
+                "costSpend",
+                "winFlips",
+                "loseFlips",
+                "totalSpend",
+                "totalProfits",
+              ])}
+            />
+          </div>
+        </div>
       </div>
     </main>
   );

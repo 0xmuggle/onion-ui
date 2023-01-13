@@ -15,7 +15,9 @@ const Pagination = ({ total, pageSize, current, onChange }: Props) => {
   if (pageCount < 2) return null;
   return (
     <div className="flex items-center justify-end gap-x-2">
-      <div>共{total}条记录</div>
+      <div className="text-sm text-gray-400">
+        共{total}条记录（{current}/{pageCount}）
+      </div>
       <div className="btn-group grid grid-cols-2">
         <button className="btn btn-outline btn-sm" onClick={prePage}>
           «

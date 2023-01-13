@@ -1,18 +1,34 @@
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { MagnifyingGlassIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
-import { useRouter } from "next/router";
+import { isEmpty, uniq } from "lodash";
+import Link from "next/link";
+import { hideStr } from "utils/utils";
 
 const Search = ({ value, onChange }: any) => {
-  const [address, setAddress] = useState(value);
+  const [caches, setCaches] = useState([]);
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const doChange = async () => {
-    if (!address || loading) return;
-    setLoading(true);
-    await onChange?.(address.toLowerCase());
-    setLoading(false);
+  const loadCache = () => {
+    setCaches(JSON.parse(localStorage.getItem("caches-addr") || "[]"));
+  };
+
+  const doChange = async (val = address) => {
+    try {
+      if (!val || loading) return;
+      setLoading(true);
+      const cachesAddr = JSON.parse(
+        localStorage.getItem("caches-addr") || "[]"
+      );
+      localStorage.setItem(
+        "caches-addr",
+        JSON.stringify(uniq([...cachesAddr, address.toLowerCase()].slice(0, 6)))
+      );
+      loadCache();
+      await onChange?.(val.toLowerCase());
+    } finally {
+      setLoading(false);
+    }
   };
 
   const doChangeAddress = (e: any) => {
@@ -20,35 +36,44 @@ const Search = ({ value, onChange }: any) => {
     setAddress(addr);
   };
 
-  const doKeyDown = (e: any) => {
-    if (e.code === "Enter") {
-      doChange();
-    }
-  };
-
   useEffect(() => {
-    doChange();
-  }, []);
+    const val = value.toLowerCase();
+    setAddress(val);
+    doChange(val);
+  }, [value]);
 
   return (
-    <div className="relative mx-auto max-w-3xl">
-      <input
-        type="text"
-        placeholder="输入ETH地址或者ENS"
-        className="input input-bordered w-full"
-        value={address}
-        onChange={doChangeAddress}
-        onKeyDown={doKeyDown}
-      />
-      <div
-        onClick={doChange}
-        className="absolute right-8 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary"
-      >
-        {loading ? (
-          <ArrowPathIcon className="animate-spin" width={24} />
-        ) : (
-          <MagnifyingGlassIcon width={24} />
-        )}
+    <div className="mx-auto max-w-3xl">
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="输入ETH地址或者ENS"
+          className="input input-bordered w-full rounded-full"
+          value={address}
+          onChange={doChangeAddress}
+        />
+        <div
+          onClick={() => doChange()}
+          className="absolute right-8 top-1/2 -translate-y-1/2 cursor-pointer hover:text-primary"
+        >
+          {loading ? (
+            <ArrowPathIcon className="animate-spin" width={24} />
+          ) : (
+            <MagnifyingGlassIcon width={24} />
+          )}
+        </div>
+      </div>
+      <div className="p-2 text-xs text-gray-400">
+        最近搜索:
+        {isEmpty(caches)
+          ? "空"
+          : caches.map((item: string) => (
+              <Link key={item} href={`/flips/${item}`}>
+                <a className="ml-2 hover:text-purple-400">
+                  {item.endsWith("eth") ? item : hideStr(item)}
+                </a>
+              </Link>
+            ))}
       </div>
     </div>
   );

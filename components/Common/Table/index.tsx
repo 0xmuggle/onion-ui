@@ -32,7 +32,7 @@ const Table = ({
 }: Props) => {
   return (
     <div className="space-y-4">
-      <table className="table w-full text-base shadow-sm">
+      <table className="table w-full shadow-sm">
         <thead>
           <tr>
             {colums.map(({ label, labelProps, key }: any) => (
