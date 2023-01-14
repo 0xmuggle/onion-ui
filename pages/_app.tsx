@@ -15,6 +15,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+        />
         <title>洋葱 - NFT盈亏分析</title>
         <meta
           name="keywords"

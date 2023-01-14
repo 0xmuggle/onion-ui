@@ -30,7 +30,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
     });
   }, [address]);
   return (
-    <div className="flex items-center gap-x-6 pt-6 pb-4 text-sm">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-6 pb-4 text-sm">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span>合集</span>
         <Select

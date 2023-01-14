@@ -13,8 +13,8 @@ const menus: MenuItem[] = [
   },
 ];
 const Header = () => (
-  <header className="sticky top-0 z-30 bg-white shadow">
-    <div className="content navbar px-4">
+  <header className="sticky top-0 z-30 bg-white px-4 shadow">
+    <div className="content navbar">
       <div className="navbar-center font-bold text-primary md:navbar-start">
         <Link href="/">
           <a className="flex items-center gap-x-2 text-xl">
