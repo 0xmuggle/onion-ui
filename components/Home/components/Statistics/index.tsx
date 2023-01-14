@@ -6,15 +6,24 @@ import { hideStr } from "utils/utils";
 
 const StatisticsItem = ({
   value = "-",
-  subfix = false,
+  subfix = 0,
   children,
   className,
   loading,
 }: any) => (
   <div className="text-center">
-    <div className={`${className} text-xl font-bold`}>
+    <div
+      className={`${className} flex items-center justify-center text-xl font-bold`}
+    >
       {loading ? "···" : value}
-      {subfix && <span className="pl-1 text-sm font-normal">ETH</span>}
+      {subfix > 0 && (
+        <div
+          className="tooltip ml-1 align-middle text-gray-400"
+          data-tip={`包含${subfix}次转出(转出亏损gas)`}
+        >
+          <InformationCircleIcon width={20} />
+        </div>
+      )}
     </div>
     <div className={` text-xs text-gray-400`}>{children}</div>
   </div>
@@ -26,6 +35,7 @@ const Statistics = ({
   address,
   name,
   cost,
+  transfer,
   costSpend,
   winFlips,
   loseFlips,
@@ -100,9 +110,10 @@ const Statistics = ({
           盈利操作
         </StatisticsItem>
         <StatisticsItem
-          value={loseFlips}
+          value={loseFlips + transfer}
           className="text-red-500"
           loading={loading}
+          subfix={transfer}
         >
           亏损操作
         </StatisticsItem>
