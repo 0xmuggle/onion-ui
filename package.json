@@ -46,7 +46,6 @@
     "react-select": "^5.7.0",
     "react-share": "^4.4.1",
     "react-toastify": "^9.1.1",
-    "use-nft": "^0.12.0",
     "wagmi": "^0.7.5",
     "yarn": "^1.22.19"
   },
