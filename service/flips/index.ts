@@ -180,8 +180,8 @@ export const flipsDtatistics = (data: any) => {
 
   // 处理数据
   const datas = data.map((item: any) => {
-    const inGas = new BN(item.inGasUsed).times(item.inGasPrice);
-    const outGas = new BN(item.outGasUsed).times(item.outGasPrice);
+    const inGas = new BN(item.inGasUsed).multipliedBy(item.inGasPrice);
+    const outGas = new BN(item.outGasUsed).multipliedBy(item.outGasPrice);
     const inAmount = new BN(item.inValue);
     const outAmount = new BN(item.outValue);
 
@@ -192,7 +192,7 @@ export const flipsDtatistics = (data: any) => {
     if (item.type === "in") {
       cost += 1;
       costSpend = costSpend.plus(inAmount).plus(inGas);
-    } else if (item.type === "transfer") {
+    } else if (item.outType === "transfer out") {
       transfer += 1;
       flipsAmount = flipsAmount.minus(outGas).minus(inGas);
     } else {
@@ -204,7 +204,6 @@ export const flipsDtatistics = (data: any) => {
       }
     }
     totalProfits = totalProfits.plus(flipsAmount);
-
     return {
       ...item,
       inGas,
