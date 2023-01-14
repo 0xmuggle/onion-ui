@@ -126,6 +126,7 @@ const Home: NextPage = ({ query }: any) => {
               name={account.name}
               {...pick(state, [
                 "cost",
+                "transfer",
                 "costSpend",
                 "winFlips",
                 "loseFlips",
