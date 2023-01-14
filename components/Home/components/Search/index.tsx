@@ -71,7 +71,7 @@ const Search = ({ value, onChange }: any) => {
           )}
         </div>
       </div>
-      <div className="p-2 text-xs text-gray-400">
+      <div className="flex flex-wrap p-2 text-xs text-gray-400">
         最近搜索:
         {isEmpty(caches)
           ? "空"

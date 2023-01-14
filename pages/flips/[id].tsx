@@ -101,7 +101,7 @@ const Home: NextPage = ({ query }: any) => {
   }, [id]);
 
   return (
-    <main className="px-4">
+    <main className="max-w-[100vw] overflow-x-hidden px-4">
       <div className="content mx-auto py-10">
         <Search value={id} onChange={loadData} />
         <Filter
@@ -109,8 +109,8 @@ const Home: NextPage = ({ query }: any) => {
           onChange={doChangeCollections}
           collections={uniq(list.map((item: any) => item.tokenName))}
         />
-        <div className="flex items-start gap-4">
-          <div className="flex-1 space-y-4">
+        <div className="flex flex-col-reverse items-start gap-4 md:flex-row">
+          <div className="w-full space-y-4">
             <SearchList
               list={(state.dataSources || []).filter(
                 (item: any) => visibleIn || item.type !== "in"
@@ -118,7 +118,7 @@ const Home: NextPage = ({ query }: any) => {
               loading={loading}
             />
           </div>
-          <div className="sticky top-[80px] w-[300px]">
+          <div className="top-[80px] w-full md:sticky md:w-[300px]">
             <Statistics
               collections={filters}
               loading={loading}
