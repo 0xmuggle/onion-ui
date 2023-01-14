@@ -43,7 +43,7 @@ export const queryAll = async (params = {}, chain = "ether") => {
     );
     flag = data.length === 10000;
     list = list.concat(data);
-    if(flag) {
+    if (flag) {
       startblock = Number(list[list.length - 1].blockNumber) + 1;
     }
   } while (flag);

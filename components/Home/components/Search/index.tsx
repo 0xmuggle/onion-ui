@@ -46,6 +46,10 @@ const Search = ({ value, onChange }: any) => {
     doChange(val);
   }, [value]);
 
+  useEffect(() => {
+    loadCache();
+  }, []);
+
   return (
     <div className="mx-auto max-w-3xl">
       <div className="relative">
