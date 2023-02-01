@@ -26,12 +26,18 @@ const Search = ({ value, onChange }: any) => {
       );
       localStorage.setItem(
         "caches-addr",
-        JSON.stringify(uniq([...cachesAddr, address.toLowerCase()].slice(0, 6)))
+        JSON.stringify(uniq([address.toLowerCase(), ...cachesAddr].slice(0, 6)))
       );
       loadCache();
       await onChange?.(val.toLowerCase());
     } finally {
       setLoading(false);
+    }
+  };
+
+  const doKeyDown = (e: any) => {
+    if (e.keyCode === 13) {
+      doChange();
     }
   };
 
@@ -59,6 +65,7 @@ const Search = ({ value, onChange }: any) => {
           className="input input-bordered w-full rounded-full"
           value={address}
           onChange={doChangeAddress}
+          onKeyDown={doKeyDown}
         />
         <div
           onClick={() => doChange()}

@@ -42,7 +42,7 @@ const getNftIn = (item: any, erc: any, count = 1) => {
 const getNftOut = (item: any, erc: any, count = 1) => {
   const { hash, timeStamp, to } = item;
   const nft: any = {
-    type: "transfer out",
+    type: "out",
     outHash: hash,
     outTimeStamp: timeStamp,
   };

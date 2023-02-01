@@ -1,32 +1,24 @@
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 
 const Filter = ({ collections = [], onChange, address }: any) => {
   const [filter, setFilter] = useState({
     collections: [],
-    visible: false,
+    type: "",
   });
-  const changeWord = (vals: any) => {
+  const doChange = (key: string) => (val: any) => {
     const nextFilter = {
       ...filter,
-      collections: vals,
+      [key]: val,
     };
     setFilter(nextFilter);
     onChange?.(nextFilter);
   };
-  const changeVisible = (e: any) => {
-    const nextFilter = {
-      ...filter,
-      visible: !e.target.checked,
-    };
-    setFilter(nextFilter);
-    onChange?.(nextFilter);
-  };
+
   useEffect(() => {
     setFilter({
       collections: [],
-      visible: false,
+      type: "",
     });
   }, [address]);
   return (
@@ -41,24 +33,32 @@ const Filter = ({ collections = [], onChange, address }: any) => {
             label: item,
             value: item,
           }))}
-          onChange={changeWord}
+          onChange={doChange("collections")}
           value={filter.collections}
         />
       </div>
-      <label className="swap">
-        <input
-          type="checkbox"
-          checked={!filter.visible}
-          onChange={changeVisible}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <span>状态</span>
+        <Select
+          isClearable
+          className="z-20 min-w-[300px]"
+          placeholder="状态"
+          options={
+            [
+              {
+                label: "已售出",
+                value: "out",
+              },
+              {
+                label: "现持有",
+                value: "in",
+              },
+            ] as any
+          }
+          onChange={doChange("type")}
+          value={filter.type}
         />
-        <div className="swap-on">
-          <EyeIcon width={20} />
-        </div>
-        <div className="swap-off">
-          <EyeSlashIcon width={20} />
-        </div>
-        <span className="pl-6">隐藏持有NFT</span>
-      </label>
+      </div>
     </div>
   );
 };

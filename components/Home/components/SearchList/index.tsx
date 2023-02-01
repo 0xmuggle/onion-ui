@@ -129,12 +129,19 @@ const SearchList = ({ list, loading }: any) => {
     },
     {
       key: "outTimeStamp",
-      label: "卖出时间",
+      label: "买卖时间",
       render: (outTimeStamp: any, item: any) => {
-        if (item.type === "in") return "";
         return (
           <div className="text-sm">
-            {moment.unix(outTimeStamp).format("YYYY/MM/DD HH:mm")}
+            <div className="tooltip ml-1 align-middle" data-tip="购入时间">
+              {moment.unix(item.inTimeStamp).format("YYYY/MM/DD HH:mm")}
+            </div>
+            <br />
+            {item.type !== "in" && (
+              <div className="tooltip ml-1 align-middle" data-tip="卖出时间">
+                {moment.unix(item.outTimeStamp).format("YYYY/MM/DD HH:mm")}
+              </div>
+            )}
           </div>
         );
       },
