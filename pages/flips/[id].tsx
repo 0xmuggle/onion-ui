@@ -16,8 +16,6 @@ const Home: NextPage = ({ query }: any) => {
 
   const [list, setList] = useState([]);
 
-  const [visibleIn, setVisibleIn] = useState(false);
-
   const [filters, setFilter] = useState([]);
 
   const [account, setAccount] = useState({
@@ -33,21 +31,23 @@ const Home: NextPage = ({ query }: any) => {
     dataSources: [],
   });
 
-  const caclCollections = (data = list, cs: any = []) => {
+  const caclCollections = (data = list, cs: any = [], type = "") => {
     setFilter(cs);
     setState(
       flipsDtatistics(
-        data.filter((item: any) => isEmpty(cs) || cs.includes(item.tokenName))
+        data
+          .filter((item: any) => isEmpty(cs) || cs.includes(item.tokenName))
+          .filter((item: any) => !type || item.type === type)
       )
     );
   };
 
-  const doChangeCollections = ({ collections, visible }: any) => {
+  const doChangeCollections = ({ collections, type }: any) => {
     caclCollections(
       list,
-      collections.map((item: any) => item.value)
+      collections.map((item: any) => item.value),
+      type?.value
     );
-    setVisibleIn(visible);
   };
 
   const loadData = async (address: string) => {
@@ -96,10 +96,6 @@ const Home: NextPage = ({ query }: any) => {
     }
   };
 
-  useEffect(() => {
-    setVisibleIn(false);
-  }, [id]);
-
   return (
     <main className="max-w-[100vw] overflow-x-hidden px-4">
       <div className="content mx-auto py-10">
@@ -111,14 +107,9 @@ const Home: NextPage = ({ query }: any) => {
         />
         <div className="flex flex-col-reverse items-start gap-4 md:flex-row">
           <div className="w-full space-y-4">
-            <SearchList
-              list={(state.dataSources || []).filter(
-                (item: any) => visibleIn || item.type !== "in"
-              )}
-              loading={loading}
-            />
+            <SearchList list={state.dataSources} loading={loading} />
           </div>
-          <div className="top-[80px] w-full md:sticky md:w-[300px]">
+          <div className="top-[80px] w-full md:sticky md:w-[400px]">
             <Statistics
               collections={filters}
               loading={loading}
