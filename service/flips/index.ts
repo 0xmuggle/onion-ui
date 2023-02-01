@@ -106,7 +106,6 @@ const queryNfts = async (address: string) => {
     balanceMap[hash].isOwner = true;
   });
   balanceMap = Object.assign(balanceMap, intxsMap);
-
   // ERC20
   erc20.forEach((item: any) => {
     const { hash } = item;
@@ -114,15 +113,13 @@ const queryNfts = async (address: string) => {
       balanceMap[hash].value = new BN(balanceMap[hash].value)
         .plus(item.value)
         .toString();
-    }
-    if (!balanceMap[hash] || item.to === address) {
+    } else if (!balanceMap[hash] || item.to === address) {
       balanceMap[item.hash] = {
         ...balanceMap[item.hash],
         ...item,
       };
     }
   });
-
   // 处理数据
   const nftMap: Record<string, boolean> = {};
   const nfts: any = [];
