@@ -26,7 +26,9 @@ const Search = ({ value, onChange }: any) => {
       );
       localStorage.setItem(
         "caches-addr",
-        JSON.stringify(uniq([address.toLowerCase(), ...cachesAddr].slice(0, 6)))
+        JSON.stringify(
+          uniq([address.toLowerCase(), ...cachesAddr].slice(0, 10))
+        )
       );
       loadCache();
       await onChange?.(val.toLowerCase());

@@ -50,7 +50,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
                 value: "out",
               },
               {
-                label: "现持有",
+                label: "未售出",
                 value: "in",
               },
             ] as any
