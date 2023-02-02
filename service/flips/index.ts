@@ -77,7 +77,7 @@ const getNftOut = (item: any, erc: any, count = 1) => {
 };
 
 const queryNfts = async (address: string) => {
-  const { nfts721, erc20, intxs, txs } = await queryData(address);
+  const { nfts721: cacheNfts721, erc20, intxs, txs } = await queryData(address);
 
   const intxsMap: any = {};
   intxs.forEach((item: any) => {
@@ -98,10 +98,13 @@ const queryNfts = async (address: string) => {
       balanceMap[hash] = item;
     }
     if (intxsMap[hash]) {
-      balanceMap[hash].value = new BN(balanceMap[hash].value)
-        .minus(intxsMap[hash].value)
-        .toString();
-      delete intxsMap[hash];
+      // 退款
+      if (new BN(item.value).gt(intxsMap[hash].value)) {
+        balanceMap[hash].value = new BN(balanceMap[hash].value)
+          .minus(intxsMap[hash].value)
+          .toString();
+        delete intxsMap[hash];
+      }
     }
     balanceMap[hash].isOwner = true;
   });
@@ -121,6 +124,27 @@ const queryNfts = async (address: string) => {
     }
   });
   // 处理数据
+  // 筛选质押的NFT
+  const stakeMap: any = {};
+  cacheNfts721.forEach((item: any) => {
+    const { hash, contractAddress: contract, to, from } = item;
+    if (!stakeMap[hash]) {
+      stakeMap[hash] = {
+        contract,
+        to,
+      };
+    } else if (
+      stakeMap[hash] &&
+      stakeMap[hash].contract !== contract &&
+      ((stakeMap[hash].to !== zeroAddress && from === zeroAddress) ||
+        (stakeMap[hash].to === zeroAddress && from !== zeroAddress))
+    ) {
+      stakeMap[hash] = true;
+    }
+  });
+  const nfts721 = cacheNfts721.filter(
+    (item: any) => stakeMap[item.hash] !== true
+  );
   const nftMap: Record<string, boolean> = {};
   const nfts: any = [];
   // 处理nfts
