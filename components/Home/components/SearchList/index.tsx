@@ -1,3 +1,4 @@
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
 import { Table } from "components/Common";
 import moment from "moment";
@@ -116,10 +117,21 @@ const SearchList = ({ list, loading }: any) => {
       key: "inTimeStamp",
       label: "持有时长",
       render: (_: any, item: any) => {
-        if (item.type === "in") return "";
+        const hours = moment().diff(
+          moment.unix(Number(item.inTimeStamp)),
+          "hours"
+        );
         return (
-          <div className="text-sm">
+          <div className="inline-flex items-center text-sm">
             {diffDuration(item.inTimeStamp, item.outTimeStamp)}
+            {item.type === "in" && hours < 3 && (
+              <div
+                className="tooltip ml-1 cursor-pointer align-middle text-orange-400"
+                data-tip="现持有时长少于3小时"
+              >
+                <InformationCircleIcon width={20} />
+              </div>
+            )}
           </div>
         );
       },

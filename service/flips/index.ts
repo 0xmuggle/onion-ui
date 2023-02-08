@@ -26,14 +26,14 @@ const getNftIn = (item: any, erc: any, count = 1) => {
     // nft inType transfer;
     return nft;
   }
-  const gasUsed = erc.gasUsed / count;
+  const gasUsed = item.gasUsed / count;
   nft.inValue = erc.value / count;
 
   if (!erc.isOwner && erc.value > 0) {
     nft.inType = "buy offer";
     return nft;
   }
-  nft.inGasPrice = erc.gasPrice;
+  nft.inGasPrice = item.gasPrice;
   nft.inGasUsed = gasUsed;
   nft.inType = from === zeroAddress ? "mint" : "buy";
   return nft;
@@ -51,16 +51,16 @@ const getNftOut = (item: any, erc: any, count = 1) => {
     return nft;
   }
   const value = erc.value / count;
-  const gasUsed = erc.gasUsed / count;
+  const gasUsed = item.gasUsed / count;
   if (erc.isOwner && erc.value > 0) {
     nft.outType = "sell offer";
     nft.outValue = value;
-    nft.outGasPrice = erc.gasPrice;
+    nft.outGasPrice = item.gasPrice;
     nft.outGasUsed = gasUsed;
     return nft;
   }
   if (erc.isOwner && erc.value <= 0) {
-    nft.outGasPrice = erc.gasPrice;
+    nft.outGasPrice = item.gasPrice;
     nft.outGasUsed = gasUsed;
     if (to === zeroAddress) {
       nft.outType = "burn";
@@ -75,7 +75,6 @@ const getNftOut = (item: any, erc: any, count = 1) => {
   }
   return nft;
 };
-
 const queryNfts = async (address: string) => {
   const { nfts721: cacheNfts721, erc20, intxs, txs } = await queryData(address);
 
@@ -90,6 +89,7 @@ const queryNfts = async (address: string) => {
       intxsMap[hash] = item;
     }
   });
+
   // 普通交易
   let balanceMap: any = {};
   txs.forEach((item: any) => {
@@ -103,8 +103,13 @@ const queryNfts = async (address: string) => {
         balanceMap[hash].value = new BN(balanceMap[hash].value)
           .minus(intxsMap[hash].value)
           .toString();
-        delete intxsMap[hash];
+      } else {
+        balanceMap[hash] = {
+          ...balanceMap[hash],
+          ...intxsMap[hash],
+        };
       }
+      delete intxsMap[hash];
     }
     balanceMap[hash].isOwner = true;
   });
@@ -163,6 +168,7 @@ const queryNfts = async (address: string) => {
     const inKey = `${contract}-${tokenID}-in`;
     const outKey = `${contract}-${tokenID}-out`;
     const erc = balanceMap[hash] || {};
+
     if (!nftMap[inKey]) {
       nfts.push(getNftIn(item, erc, nftCountMap[hash]));
       nftMap[inKey] = true;
