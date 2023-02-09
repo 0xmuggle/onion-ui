@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { useState } from "react";
 import flips, { flipsDtatistics } from "service/flips";
 import { Search, Statistics, SearchList, Filter } from "components/Home";
-import { isEmpty, pick, uniq } from "lodash";
+import { isEmpty, pick, sortBy, uniq } from "lodash";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
@@ -34,23 +34,23 @@ const Home: NextPage = ({ query }: any) => {
 
   const caclCollections = (data = list, cs: any = [], type = "", times = 0) => {
     setFilter(cs);
-    setState(
-      flipsDtatistics(
-        data.filter((item: any) => {
-          const filterCollection = isEmpty(cs) || cs.includes(item.tokenName);
-          const filterType = !type || item.type === type;
-          let filterTime = !times;
-          if (times) {
-            const hours = moment().diff(
-              moment.unix(Number(item.inTimeStamp)),
-              "hours"
-            );
-            filterTime = hours <= times;
-          }
-          return filterCollection && filterType && filterTime;
-        })
-      )
-    );
+    let arrs = data.filter((item: any) => {
+      const filterCollection = isEmpty(cs) || cs.includes(item.tokenName);
+      const filterType = !type || item.type === type;
+      let filterTime = !times;
+      if (times) {
+        const hours = moment().diff(
+          moment.unix(Number(item.inTimeStamp)),
+          "hours"
+        );
+        filterTime = hours <= times;
+      }
+      return filterCollection && filterType && filterTime;
+    });
+    if (type === "out") {
+      arrs = sortBy(arrs, "outTimeStamp");
+    }
+    setState(flipsDtatistics(arrs));
   };
 
   const doChangeCollections = ({ collections, type, times }: any) => {
@@ -100,7 +100,7 @@ const Home: NextPage = ({ query }: any) => {
       });
       const data: any = await flips(addr.toLocaleLowerCase());
       setList(data);
-      caclCollections(data);
+      caclCollections(data, [], "out", 0);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -113,7 +113,7 @@ const Home: NextPage = ({ query }: any) => {
       <div className="content mx-auto py-10">
         <Search value={id} onChange={loadData} />
         <Filter
-          address={account.address}
+          loading={loading}
           onChange={doChangeCollections}
           collections={uniq(list.map((item: any) => item.tokenName))}
         />

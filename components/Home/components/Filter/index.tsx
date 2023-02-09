@@ -20,10 +20,21 @@ const times: any = [
   },
 ];
 
-const Filter = ({ collections = [], onChange, address }: any) => {
+const soldTypes = [
+  {
+    label: "已售出",
+    value: "out",
+  },
+  {
+    label: "未售出",
+    value: "in",
+  },
+] as any;
+
+const Filter = ({ collections = [], onChange, loading }: any) => {
   const [filter, setFilter] = useState({
     collections: [],
-    type: "",
+    type: soldTypes[0],
     times: "",
   });
   const doChange = (key: string) => (val: any) => {
@@ -36,12 +47,14 @@ const Filter = ({ collections = [], onChange, address }: any) => {
   };
 
   useEffect(() => {
-    setFilter({
-      collections: [],
-      type: "",
-      times: "",
-    });
-  }, [address]);
+    if (loading) {
+      setFilter({
+        collections: [],
+        type: soldTypes[0],
+        times: "",
+      });
+    }
+  }, [loading]);
 
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-6 pb-4 text-sm">
@@ -65,18 +78,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
           isClearable
           className="z-20 min-w-[180px]"
           placeholder="状态"
-          options={
-            [
-              {
-                label: "已售出",
-                value: "out",
-              },
-              {
-                label: "未售出",
-                value: "in",
-              },
-            ] as any
-          }
+          options={soldTypes}
           onChange={doChange("type")}
           value={filter.type}
         />
