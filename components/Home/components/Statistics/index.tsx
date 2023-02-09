@@ -139,10 +139,10 @@ const Statistics = ({
             持有成本(ETH)
           </StatisticsItem>
         </div>
-      </div>
-      <div className="flex items-center justify-center space-x-2 pt-4 pb-2 text-xs text-gray-400">
-        <img width={20} src="/favicon.ico" />
-        <span>© onion.moneystory.dev</span>
+        <div className="flex items-center justify-center space-x-2 pt-4 text-xs text-gray-400">
+          <img alt="" width={20} src="/favicon.ico" />
+          <span>onion.moneystory.dev</span>
+        </div>
       </div>
     </div>
   );

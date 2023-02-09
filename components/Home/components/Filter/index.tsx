@@ -49,7 +49,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
         <span>合集</span>
         <Select
           isMulti
-          className="z-20 min-w-[200px]"
+          className="z-20 min-w-[220px]"
           placeholder="请选择NFT合集"
           options={collections.map((item: any) => ({
             label: item,
@@ -63,7 +63,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
         <span>状态</span>
         <Select
           isClearable
-          className="z-20 min-w-[200px]"
+          className="z-20 min-w-[180px]"
           placeholder="状态"
           options={
             [
@@ -85,7 +85,7 @@ const Filter = ({ collections = [], onChange, address }: any) => {
         <span>时间</span>
         <Select
           isClearable
-          className="z-20 min-w-[200px]"
+          className="z-20 min-w-[180px]"
           placeholder="请选择时间"
           options={times}
           onChange={doChange("times")}

@@ -90,13 +90,22 @@ export const queryData = async (address: string) => {
   //   account: { nft721Block, txsBlock, intxsBlock, erc20Block, ...account },
   //   ...cache
   // } = await queryCacheData(address);
-  const { nft721Block, txsBlock, intxsBlock, erc20Block } = defaultAccount;
+  const { nft721Block, txsBlock, intxsBlock, erc20Block, nft1155Block } =
+    defaultAccount;
   // 查询721
   const nfts721 = await queryAll({
     address,
     module: "account",
     action: "tokennfttx",
     startblock: nft721Block + 1,
+  });
+
+  // 查询1155
+  const nfts1155 = await queryAll({
+    address,
+    module: "account",
+    action: "token1155tx",
+    startblock: nft1155Block + 1,
   });
 
   // 查询普通交易
@@ -143,7 +152,12 @@ export const queryData = async (address: string) => {
   return {
     erc20,
     nfts721,
+    nfts1155,
     intxs,
     txs,
   };
+};
+
+export const arrayFrom = (count: number) => {
+  return new Array(count).fill("array");
 };

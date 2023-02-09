@@ -81,6 +81,7 @@ export interface DB extends DBSchema {
 }
 
 export const defaultAccount = {
+  nft1155Block: 0,
   nft721Block: 0,
   txsBlock: 0,
   erc20Block: 0,

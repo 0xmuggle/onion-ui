@@ -98,7 +98,7 @@ const Home: NextPage = ({ query }: any) => {
         address: addr,
         name: address,
       });
-      const data = await flips(addr);
+      const data = await flips(addr.toLocaleLowerCase());
       setList(data);
       caclCollections(data);
     } catch (e: any) {

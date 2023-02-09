@@ -1,9 +1,30 @@
-import { isEmpty, orderBy } from "lodash";
+import { isEmpty, orderBy, sortBy } from "lodash";
 import BN from "bignumber.js";
-import { queryCacheData, queryData } from "./tool";
+import { arrayFrom, queryCacheData, queryData } from "./tool";
 
 export const zeroAddress = "0x0000000000000000000000000000000000000000";
 
+const filterStake = (nfts: any[] = []) => {
+  // 筛选质押的NFT
+  const stakeMap: any = {};
+  nfts.forEach((item: any) => {
+    const { hash, contractAddress: contract, to, from, functionName } = item;
+    if (!stakeMap[hash]) {
+      stakeMap[hash] = {
+        contract,
+        to,
+      };
+    } else if (
+      stakeMap[hash] &&
+      stakeMap[hash].contract !== contract &&
+      ((stakeMap[hash].to !== zeroAddress && from === zeroAddress) ||
+        (stakeMap[hash].to === zeroAddress && from !== zeroAddress))
+    ) {
+      stakeMap[hash] = true;
+    }
+  });
+  return nfts.filter((item: any) => stakeMap[item.hash] !== true);
+};
 const getNftIn = (item: any, erc: any, count = 1) => {
   const { tokenID, contractAddress: contract, from, hash } = item;
   const nft: any = {
@@ -76,7 +97,13 @@ const getNftOut = (item: any, erc: any, count = 1) => {
   return nft;
 };
 const queryNfts = async (address: string) => {
-  const { nfts721: cacheNfts721, erc20, intxs, txs } = await queryData(address);
+  const {
+    nfts1155: cacheNfts1155,
+    nfts721: cacheNfts721,
+    erc20,
+    intxs,
+    txs,
+  } = await queryData(address);
 
   const intxsMap: any = {};
   intxs.forEach((item: any) => {
@@ -130,27 +157,8 @@ const queryNfts = async (address: string) => {
   });
   // 处理数据
   // 筛选质押的NFT
-  const stakeMap: any = {};
-  cacheNfts721.forEach((item: any) => {
-    const { hash, contractAddress: contract, to, from } = item;
-    if (!stakeMap[hash]) {
-      stakeMap[hash] = {
-        contract,
-        to,
-      };
-    } else if (
-      stakeMap[hash] &&
-      stakeMap[hash].contract !== contract &&
-      ((stakeMap[hash].to !== zeroAddress && from === zeroAddress) ||
-        (stakeMap[hash].to === zeroAddress && from !== zeroAddress))
-    ) {
-      stakeMap[hash] = true;
-    }
-  });
-  const nfts721 = cacheNfts721.filter(
-    (item: any) => stakeMap[item.hash] !== true
-  );
   const nftMap: Record<string, boolean> = {};
+  const nfts721 = filterStake(cacheNfts721);
   const nfts: any = [];
   // 处理nfts
   // 买卖NFT的次数统计
@@ -186,7 +194,43 @@ const queryNfts = async (address: string) => {
       nftMap[outKey] = true;
     }
   });
-  return nfts;
+
+  // 处理nft1155
+  const nfts1155 = filterStake(cacheNfts1155);
+  nfts1155.forEach((item: any) => {
+    const { tokenID, contractAddress: contract, to, tokenValue, hash } = item;
+    const erc = balanceMap[hash] || {};
+    const count = Number(tokenValue);
+
+    if (to === address) {
+      // in
+      // 过滤太大的数字
+      if (count < 200) {
+        arrayFrom(count).forEach(() => {
+          nfts.push(getNftIn(item, erc, count));
+        });
+      }
+    } else {
+      // out
+      if (!(erc.functionName || "").toLocaleLowerCase().includes("stake")) {
+        arrayFrom(count).forEach(() => {
+          const index = nfts.findLastIndex(
+            (n: any) =>
+              n.type === "in" &&
+              n.contract === contract &&
+              n.tokenID === tokenID
+          );
+          if (index != -1) {
+            nfts[index] = {
+              ...nfts[index],
+              ...getNftOut(item, erc, count),
+            };
+          }
+        });
+      }
+    }
+  });
+  return sortBy(nfts, "inTimeStamp");
 };
 
 export const calcAmount = (value: any) => {
