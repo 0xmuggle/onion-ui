@@ -1,15 +1,11 @@
-import { getDefaultProvider } from "ethers";
 import type { AppProps } from "next/app";
 import BasicLayout from "components/BasicLayout";
 import { ToastContainer } from "react-toastify";
 import Head from "next/head";
+import { Analytics } from "@vercel/analytics/react";
 import "styles/globals.css";
 import "styles/motion.css";
 import "react-toastify/dist/ReactToastify.css";
-
-const ethersConfig = {
-  provider: getDefaultProvider("homestead"),
-};
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -42,6 +38,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         pauseOnHover={false}
         theme="light"
       />
+      <Analytics />
     </>
   );
 }
