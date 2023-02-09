@@ -3,7 +3,7 @@ const Footer = () => (
     <div className="bg-gray-100">
       <div className="container mx-auto flex flex-col items-center py-6 sm:flex-row">
         <p className="mt-4 text-sm text-gray-500">
-          © {new Date().getFullYear()} Onion <span>v0.0.2</span>
+          © {new Date().getFullYear()} Onion <span>v0.0.3</span>
         </p>
         <span className="mt-4 inline-flex justify-center sm:ml-auto sm:mt-0 sm:justify-start">
           <a
