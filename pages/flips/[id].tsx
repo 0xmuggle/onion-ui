@@ -1,11 +1,12 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import flips, { flipsDtatistics } from "service/flips";
 import { Search, Statistics, SearchList, Filter } from "components/Home";
 import { isEmpty, pick, uniq } from "lodash";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
+import moment from "moment";
 
 const Home: NextPage = ({ query }: any) => {
   const { push } = useRouter();
@@ -31,22 +32,33 @@ const Home: NextPage = ({ query }: any) => {
     dataSources: [],
   });
 
-  const caclCollections = (data = list, cs: any = [], type = "") => {
+  const caclCollections = (data = list, cs: any = [], type = "", times = 0) => {
     setFilter(cs);
     setState(
       flipsDtatistics(
-        data
-          .filter((item: any) => isEmpty(cs) || cs.includes(item.tokenName))
-          .filter((item: any) => !type || item.type === type)
+        data.filter((item: any) => {
+          const filterCollection = isEmpty(cs) || cs.includes(item.tokenName);
+          const filterType = !type || item.type === type;
+          let filterTime = !times;
+          if (times) {
+            const hours = moment().diff(
+              moment.unix(Number(item.inTimeStamp)),
+              "hours"
+            );
+            filterTime = hours <= times;
+          }
+          return filterCollection && filterType && filterTime;
+        })
       )
     );
   };
 
-  const doChangeCollections = ({ collections, type }: any) => {
+  const doChangeCollections = ({ collections, type, times }: any) => {
     caclCollections(
       list,
       collections.map((item: any) => item.value),
-      type?.value
+      type?.value,
+      times?.value
     );
   };
 
