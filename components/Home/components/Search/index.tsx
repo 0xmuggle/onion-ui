@@ -64,7 +64,7 @@ const Search = ({ value, onChange }: any) => {
         <input
           type="text"
           placeholder="输入ETH地址或者ENS"
-          className="input input-bordered w-full rounded-full"
+          className="input input-bordered w-full rounded-full pr-20"
           value={address}
           onChange={doChangeAddress}
           onKeyDown={doKeyDown}

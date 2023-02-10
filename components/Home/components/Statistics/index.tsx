@@ -30,7 +30,6 @@ const StatisticsItem = ({
 );
 
 const Statistics = ({
-  hideUser = false,
   loading,
   address,
   name,
@@ -54,95 +53,87 @@ const Statistics = ({
     return shareTxt;
   };
   return (
-    <div>
-      <div className="rounded-xl border p-6">
-        <div className="flex items-center gap-2 pb-4">
-          {!hideUser && (
-            <>
-              <Avatar size={48} avatar={loading ? zeroAddress : address} />
-              <a
-                target="_blank"
-                href={`https://opensea.io/account/${address}`}
-                className="flex-1 space-y-1"
-                rel="noreferrer"
-              >
-                <div>
-                  {loading ? "..." : name !== address ? name : "Unknown"}
-                </div>
-                <div className="text-xs text-gray-400">
-                  {loading ? "···" : hideStr(address)}
-                </div>
-              </a>
-            </>
-          )}
-          {!loading && (
-            <div
-              className="tooltip cursor-pointer text-left"
-              data-tip={getShareTxt()}
+    <div className="rounded-xl border p-6">
+      <div className="flex items-center gap-2 pb-4">
+        <Avatar size={48} avatar={loading ? zeroAddress : address} />
+        <a
+          target="_blank"
+          href={`https://opensea.io/account/${address}`}
+          className="flex-1 space-y-1"
+          rel="noreferrer"
+        >
+          <div>{loading ? "..." : name !== address ? name : "Unknown"}</div>
+          <div className="text-xs text-gray-400">
+            {loading ? "···" : hideStr(address)}
+          </div>
+        </a>
+        {!loading && (
+          <div
+            className="tooltip cursor-pointer text-left"
+            data-tip={getShareTxt()}
+          >
+            <a
+              className="text-blue-500"
+              target="_blank"
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                getShareTxt() + `#OnionNFT #Fliper ${location.href}`
+              )}`}
+              rel="noreferrer"
             >
-              <a
-                className="text-blue-500"
-                target="_blank"
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                  getShareTxt() + `#OnionNFT #Fliper ${location.href}`
-                )}`}
-                rel="noreferrer"
-              >
-                <ShareIcon width={20} />
-              </a>
-            </div>
-          )}
-        </div>
-        <div>
-          {!isEmpty(collections) && (
-            <div className="mb-4 flex flex-wrap gap-2 rounded-lg bg-gray-50 p-4">
-              {collections.map((item: any) => (
-                <div className="badge badge-outline badge-sm" key="item">
-                  {item}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 border-b border-dotted pb-4">
-          <StatisticsItem
-            value={winFlips}
-            className="text-green-500"
-            loading={loading}
-          >
-            盈利操作
-          </StatisticsItem>
-          <StatisticsItem
-            value={loseFlips + transfer}
-            className="text-red-500"
-            loading={loading}
-            subfix={transfer}
-          >
-            亏损操作
-          </StatisticsItem>
-          <StatisticsItem value={calcAmount(totalSpend)} loading={loading}>
-            总花费(ETH)
-          </StatisticsItem>
-          <StatisticsItem value={calcAmount(totalProfits)} loading={loading}>
-            已实现盈亏(ETH)
-          </StatisticsItem>
-        </div>
-        <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 pt-4">
-          <StatisticsItem
-            value={cost}
-            className="text-blue-500"
-            loading={loading}
-          >
-            现持有NFT
-          </StatisticsItem>
-          <StatisticsItem value={calcAmount(costSpend)} loading={loading}>
-            持有成本(ETH)
-          </StatisticsItem>
-        </div>
-        <div className="flex items-center justify-center space-x-2 pt-4 text-xs text-gray-400">
-          <img alt="" width={20} src="/favicon.ico" />
-          <span>onion.moneystory.dev</span>
-        </div>
+              <ShareIcon width={20} />
+            </a>
+          </div>
+        )}
+      </div>
+      <div>
+        {!isEmpty(collections) && (
+          <div className="mb-4 flex flex-wrap gap-2 rounded-lg bg-gray-50 p-4">
+            {collections.map((item: any) => (
+              <div className="badge badge-outline badge-sm" key="item">
+                {item}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 border-b border-dotted pb-4">
+        <StatisticsItem
+          value={winFlips}
+          className="text-green-500"
+          loading={loading}
+        >
+          盈利操作
+        </StatisticsItem>
+        <StatisticsItem
+          value={loseFlips + transfer}
+          className="text-red-500"
+          loading={loading}
+          subfix={transfer}
+        >
+          亏损操作
+        </StatisticsItem>
+        <StatisticsItem value={calcAmount(totalSpend)} loading={loading}>
+          总花费(ETH)
+        </StatisticsItem>
+        <StatisticsItem value={calcAmount(totalProfits)} loading={loading}>
+          已实现盈亏(ETH)
+        </StatisticsItem>
+      </div>
+      <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 pt-4">
+        <StatisticsItem
+          value={cost}
+          className="text-blue-500"
+          loading={loading}
+        >
+          现持有NFT
+        </StatisticsItem>
+        <StatisticsItem value={calcAmount(costSpend)} loading={loading}>
+          持有成本(ETH)
+        </StatisticsItem>
+      </div>
+      <div className="flex items-center justify-center space-x-2 pt-4 text-xs text-gray-400">
+        <img alt="" width={20} src="/favicon.ico" />
+        <span>onion.moneystory.dev</span>
       </div>
     </div>
   );

@@ -100,7 +100,7 @@ const Home: NextPage = ({ query }: any) => {
       });
       const data: any = await flips(addr.toLocaleLowerCase());
       setList(data);
-      caclCollections(data, [], "out", 0);
+      caclCollections(data, [], "", 0);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -117,11 +117,11 @@ const Home: NextPage = ({ query }: any) => {
           onChange={doChangeCollections}
           collections={uniq(list.map((item: any) => item.tokenName))}
         />
-        <div className="flex flex-col-reverse items-start gap-4 md:flex-row">
-          <div className="w-full space-y-4">
+        <div className="flex flex-col-reverse items-start gap-4 lg:flex-row">
+          <div className="w-full">
             <SearchList list={state.dataSources} loading={loading} />
           </div>
-          <div className="top-[80px] w-full md:sticky md:w-[400px]">
+          <div className="top-[80px] w-full min-w-[320px] md:sticky lg:w-[320px]">
             <Statistics
               collections={filters}
               loading={loading}

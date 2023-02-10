@@ -1,6 +1,6 @@
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
-import { Table } from "components/Common";
+import { NFT, Table } from "components/Common";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { calcAmount } from "service/flips";
@@ -53,18 +53,29 @@ const SearchList = ({ list, loading }: any) => {
     {
       key: "tokenID",
       label: "NFT",
+      labelProps: {
+        className: "!relative !z-0",
+      },
       render: (_: any, item: any) => {
         return (
-          <LinkTip
-            className="text-sm"
-            type="opensea"
-            value={`${item.contract}/${item.tokenID}`}
-          >
-            <div className="text-sm">{item.tokenName}</div>
-            <div className="max-w-[100px] truncate text-xs opacity-50">
-              #{item.tokenID}
+          <div className="flex items-center gap-x-2">
+            <NFT
+              contract={item.contract}
+              tokenId={item.tokenID}
+              tokenType={item.tokenType}
+            />
+            <div>
+              <div className="text-sm">{item.tokenName}</div>
+              <LinkTip
+                type="opensea"
+                value={`${item.contract}/${item.tokenID}`}
+              >
+                <div className="max-w-[100px]  truncate text-xs opacity-50">
+                  #{item.tokenID}
+                </div>
+              </LinkTip>
             </div>
-          </LinkTip>
+          </div>
         );
       },
     },

@@ -34,7 +34,7 @@ const soldTypes = [
 const Filter = ({ collections = [], onChange, loading }: any) => {
   const [filter, setFilter] = useState({
     collections: [],
-    type: soldTypes[0],
+    type: "",
     times: "",
   });
   const doChange = (key: string) => (val: any) => {
@@ -50,7 +50,7 @@ const Filter = ({ collections = [], onChange, loading }: any) => {
     if (loading) {
       setFilter({
         collections: [],
-        type: soldTypes[0],
+        type: "",
         times: "",
       });
     }
@@ -58,11 +58,11 @@ const Filter = ({ collections = [], onChange, loading }: any) => {
 
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-6 pb-4 text-sm">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 md:w-auto">
         <span>合集</span>
         <Select
           isMulti
-          className="z-20 min-w-[220px]"
+          className="z-10 min-w-[220px] flex-1"
           placeholder="请选择NFT合集"
           options={collections.map((item: any) => ({
             label: item,
@@ -72,22 +72,22 @@ const Filter = ({ collections = [], onChange, loading }: any) => {
           value={filter.collections}
         />
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 md:w-auto">
         <span>状态</span>
         <Select
           isClearable
-          className="z-20 min-w-[180px]"
+          className="z-2 min-w-[180px] flex-1"
           placeholder="状态"
           options={soldTypes}
           onChange={doChange("type")}
           value={filter.type}
         />
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 md:w-auto">
         <span>时间</span>
         <Select
           isClearable
-          className="z-20 min-w-[180px]"
+          className="z-1 min-w-[180px] flex-1"
           placeholder="请选择时间"
           options={times}
           onChange={doChange("times")}

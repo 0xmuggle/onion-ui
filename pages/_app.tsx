@@ -38,7 +38,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         pauseOnHover={false}
         theme="light"
       />
-      <Analytics />
+      {process.env.NODE_ENV === "production" && <Analytics />}
     </>
   );
 }

@@ -42,6 +42,7 @@ const getNftIn = (item: any, erc: any, count = 1) => {
     outValue: 0, // 转出时消耗的ETH
     outGasPrice: 0, // 转出时消耗的gas
     outGasUsed: 0,
+    tokenType: item.tokenValue !== undefined ? "1155" : "721",
   };
   if (isEmpty(erc)) {
     // nft inType transfer;
