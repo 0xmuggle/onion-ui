@@ -201,7 +201,6 @@ const queryNfts = async (address: string) => {
     (item: any) => item.tokenValue < 200
   );
   nfts1155.forEach((item: any, index: number) => {
-    console.log(">>> index", index);
     const { tokenID, contractAddress: contract, to, tokenValue, hash } = item;
     const erc = balanceMap[hash] || {};
     const count = Number(tokenValue);

@@ -8,8 +8,10 @@ const CACHE_NFT_METADATA = "CACHE_NFT_METADATA";
 
 const instance = new Web3(defaultRpcUri);
 
-const parseIPFS = (uri: string) =>
-  (uri || "").replace("ipfs://", "https://gateway.ipfs.io/ipfs/");
+const parseIPFS = (uri: string = "") =>
+  uri.startsWith("ipfs")
+    ? uri.replace("ipfs://", "https://gateway.ipfs.io/ipfs/")
+    : uri;
 
 const getUri = async (uri: string) => {
   try {

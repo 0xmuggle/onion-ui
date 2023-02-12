@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getById } from "./service";
 
 interface NFTProps {
@@ -7,14 +7,19 @@ interface NFTProps {
   tokenType: string;
 }
 const NFT = ({ contract, tokenId, tokenType }: NFTProps) => {
+  const ref = useRef<any>();
   const [src, setSrc] = useState("");
   const lodaData = async () => {
     setSrc("");
+    ref.current = false;
     const d = await getById(contract, tokenId, tokenType);
     const img = new Image();
     img.src = d;
+    ref.current = true;
     img.onload = () => {
-      setSrc(d);
+      if (ref.current) {
+        setSrc(d);
+      }
     };
   };
 
