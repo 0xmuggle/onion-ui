@@ -43,11 +43,15 @@ const Home: NextPage = ({ query }: any) => {
           moment.unix(Number(item.inTimeStamp)),
           "hours"
         );
-        filterTime = hours <= times;
+        const endHours = moment().diff(
+          moment.unix(Number(item.outTimeStamp)),
+          "hours"
+        );
+        filterTime = hours <= times || endHours <= times;
       }
       return filterCollection && filterType && filterTime;
     });
-    if (type === "out") {
+    if (type === "out" && times) {
       arrs = sortBy(arrs, "outTimeStamp");
     }
     setState(flipsDtatistics(arrs));

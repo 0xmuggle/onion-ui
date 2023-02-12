@@ -48,8 +48,8 @@ export const getById = async (
       token.id = `${contractAddress}-${tokenId}`;
       token.uri = uri;
       token.imageUrl = await getUri(parseIPFS(uri));
-    } catch (e) {
-      console.log(">> e", e);
+    } catch {
+      // console.log(">> e", e);
     }
   } else if (!token.imageUrl) {
     token.imageUrl = await getUri(parseIPFS(token.uri));
