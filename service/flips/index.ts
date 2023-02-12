@@ -172,7 +172,7 @@ const queryNfts = async (address: string) => {
     nftCountMap[hash] += 1;
   });
 
-  nfts721.forEach((item: any) => {
+  nfts721.forEach((item: any, index: number) => {
     const { tokenID, contractAddress: contract, from, hash } = item;
     const inKey = `${contract}-${tokenID}-in`;
     const outKey = `${contract}-${tokenID}-out`;
@@ -196,21 +196,20 @@ const queryNfts = async (address: string) => {
     }
   });
 
-  // 处理nft1155
-  const nfts1155 = filterStake(cacheNfts1155);
-  nfts1155.forEach((item: any) => {
+  // 处理nft1155 同时过滤太多的数量
+  const nfts1155 = filterStake(cacheNfts1155).filter(
+    (item: any) => item.tokenValue < 200
+  );
+  nfts1155.forEach((item: any, index: number) => {
+    console.log(">>> index", index);
     const { tokenID, contractAddress: contract, to, tokenValue, hash } = item;
     const erc = balanceMap[hash] || {};
     const count = Number(tokenValue);
-
     if (to === address) {
       // in
-      // 过滤太大的数字
-      if (count < 200) {
-        arrayFrom(count).forEach(() => {
-          nfts.push(getNftIn(item, erc, count));
-        });
-      }
+      arrayFrom(count).forEach(() => {
+        nfts.push(getNftIn(item, erc, count));
+      });
     } else {
       // out
       if (!(erc.functionName || "").toLocaleLowerCase().includes("stake")) {
