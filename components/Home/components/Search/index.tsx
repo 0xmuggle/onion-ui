@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import {
+  MagnifyingGlassIcon,
+  ArrowPathIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import { isEmpty, uniq } from "lodash";
 import Link from "next/link";
 import { hideStr } from "utils/utils";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 const Search = ({ value, onChange }: any) => {
   const [caches, setCaches] = useState([]);
@@ -54,6 +59,11 @@ const Search = ({ value, onChange }: any) => {
     doChange(val);
   }, [value]);
 
+  const clear = () => {
+    setCaches([]);
+    localStorage.removeItem("caches-addr");
+  };
+
   useEffect(() => {
     loadCache();
   }, []);
@@ -80,7 +90,15 @@ const Search = ({ value, onChange }: any) => {
           )}
         </div>
       </div>
-      <div className="flex flex-wrap p-2 text-xs text-gray-400">
+      <div className="flex flex-wrap items-center p-2 text-xs text-gray-400">
+        {!isEmpty(caches) && (
+          <div
+            className="tooltip mr-2 cursor-pointer hover:text-primary"
+            data-tip="清空历史记录"
+          >
+            <XCircleIcon width={16} onClick={clear} />
+          </div>
+        )}
         最近搜索:
         {isEmpty(caches)
           ? "空"

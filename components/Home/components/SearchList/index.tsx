@@ -1,5 +1,6 @@
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
+import { linkMap } from "common/constant";
 import { NFT, Table } from "components/Common";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -24,22 +25,24 @@ const diffDuration = (start: string, end: string) => {
 
 const ListItem = ({ value, hash, gas, type, ...props }: any) => (
   <LinkTip value={hash}>
-    <div {...props}>
-      <span className="text-sm font-bold">{calcAmount(value)}</span>
-      <span className="pl-1 text-xs">ETH</span>
-      {type && <IconTip type={type} />}
-    </div>
-    {gas && (
-      <div className="flex items-center text-xs text-gray-400">
-        <img
-          alt="gas"
-          className="mr-1 align-middle"
-          src="/icons/gas.svg"
-          width={12}
-        />
-        <span>{calcAmount(gas)}</span>
+    <div>
+      <div>
+        <span className="text-sm font-bold">{calcAmount(value)}</span>
+        <span className="pl-1 text-xs">ETH</span>
+        {type && <IconTip type={type} />}
       </div>
-    )}
+      {gas && (
+        <div className="flex items-center gap-x-1 text-xs text-gray-400">
+          <img
+            alt="gas"
+            className="mr-1 align-middle"
+            src="/icons/gas.svg"
+            width={12}
+          />
+          <span>{calcAmount(gas)}</span>
+        </div>
+      )}
+    </div>
   </LinkTip>
 );
 
@@ -66,14 +69,16 @@ const SearchList = ({ list, loading }: any) => {
             />
             <div>
               <div className="text-sm">{item.tokenName}</div>
-              <LinkTip
-                type="opensea"
-                value={`${item.contract}/${item.tokenID}`}
-              >
+              <div className="flex items-center gap-x-1">
+                <LinkTip
+                  type="opensea"
+                  value={`${item.contract}/${item.tokenID}`}
+                />
+                <LinkTip type="blur" value={item.contract} />
                 <div className="max-w-[100px]  truncate text-xs opacity-50">
                   #{item.tokenID}
                 </div>
-              </LinkTip>
+              </div>
             </div>
           </div>
         );

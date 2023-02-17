@@ -1,3 +1,4 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 
@@ -57,7 +58,7 @@ const Filter = ({ collections = [], onChange, loading }: any) => {
   }, [loading]);
 
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-6 pb-4 text-sm">
+    <div className="flex flex-wrap items-center gap-4 pt-6 pb-4 text-sm">
       <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 md:w-auto">
         <span>合集</span>
         <Select

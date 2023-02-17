@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import flips, { flipsDtatistics } from "service/flips";
 import { Search, Statistics, SearchList, Filter } from "components/Home";
-import { isEmpty, pick, sortBy, uniq } from "lodash";
+import { isEmpty, pick, sortBy, throttle, uniq } from "lodash";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
@@ -27,6 +27,8 @@ const Home: NextPage = ({ query }: any) => {
   const [state, setState] = useState<any>({
     winFlips: 0,
     loseFlips: 0,
+    approves: 0,
+    approvesSpend: "",
     totalSpend: "",
     totalProfits: "",
     dataSources: [],
@@ -36,7 +38,10 @@ const Home: NextPage = ({ query }: any) => {
     setFilter(cs);
     let arrs = data.filter((item: any) => {
       const filterCollection = isEmpty(cs) || cs.includes(item.tokenName);
-      const filterType = !type || item.type === type;
+      const filterType =
+        !type ||
+        item.type === type ||
+        (item.type === "approve" && item.type !== "in");
       let filterTime = !times;
       if (times) {
         const hours = moment().diff(
@@ -70,11 +75,14 @@ const Home: NextPage = ({ query }: any) => {
     try {
       setLoading(true);
       setList([]);
+      setFilter([]);
       setState({
         winFlips: 0,
         loseFlips: 0,
         totalSpend: "",
         totalProfits: "",
+        approveSpend: "",
+        approves: 0,
         dataSources: [],
       });
       let addr: any = address;
@@ -139,6 +147,8 @@ const Home: NextPage = ({ query }: any) => {
                 "loseFlips",
                 "totalSpend",
                 "totalProfits",
+                "approveSpend",
+                "approves",
               ])}
             />
           </div>

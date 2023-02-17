@@ -20,6 +20,7 @@ const NFT = ({ contract, tokenId, tokenType }: NFTProps) => {
       if (ref.current) {
         setSrc(d);
       }
+      ref.current = false;
     };
   };
 
@@ -32,7 +33,7 @@ const NFT = ({ contract, tokenId, tokenType }: NFTProps) => {
       <div className="relative h-0 w-full overflow-hidden rounded-xl bg-gray-100 pb-[100%]">
         {src && (
           <img
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2"
             src={src}
             height={50}
             alt=""

@@ -25,6 +25,24 @@ const filterStake = (nfts: any[] = []) => {
   });
   return nfts.filter((item: any) => stakeMap[item.hash] !== true);
 };
+
+const getNftApprove = (item: any, erc: any) => {
+  const { contractAddress: contract, tokenID } = item;
+  return {
+    contract,
+    tokenID,
+    tokenName: item.tokenName,
+    type: "approve",
+    inGasPrice: 0, // 转入时消耗的gas
+    inGasUsed: 0,
+    inValue: erc.value,
+    outValue: 0, // 转出时消耗的ETH
+    outGasPrice: 0, // 转出时消耗的gas
+    outGasUsed: 0,
+    count: erc.count,
+    inTimeStamp: item.timeStamp,
+  };
+};
 const getNftIn = (item: any, erc: any, count = 1) => {
   const { tokenID, contractAddress: contract, from, hash } = item;
   const nft: any = {
@@ -119,9 +137,10 @@ const queryNfts = async (address: string) => {
   });
 
   // 普通交易
+  const approveTx: any = {};
   let balanceMap: any = {};
   txs.forEach((item: any) => {
-    const { hash } = item;
+    const { hash, functionName, to } = item;
     if (!balanceMap[hash]) {
       balanceMap[hash] = item;
     }
@@ -140,6 +159,17 @@ const queryNfts = async (address: string) => {
       delete intxsMap[hash];
     }
     balanceMap[hash].isOwner = true;
+
+    if (functionName.includes("setApprovalForAll")) {
+      const { gasPrice, gasUsed } = item;
+      if (!approveTx[to]) {
+        approveTx[to] = item;
+      }
+      approveTx[to].value = new BN(approveTx[to].value || 0)
+        .plus(new BN(gasPrice).times(gasUsed))
+        .toString();
+      approveTx[to].count = (approveTx[to].count || 0) + 1;
+    }
   });
   balanceMap = Object.assign(balanceMap, intxsMap);
   // ERC20
@@ -182,6 +212,11 @@ const queryNfts = async (address: string) => {
       nfts.push(getNftIn(item, erc, nftCountMap[hash]));
       nftMap[inKey] = true;
       nftMap[outKey] = false;
+
+      if (approveTx[contract]) {
+        nfts.push(getNftApprove(item, approveTx[contract]));
+        delete approveTx[contract];
+      }
     } else if (!nftMap[outKey]) {
       const index = nfts.findLastIndex(
         (n: any) =>
@@ -209,6 +244,10 @@ const queryNfts = async (address: string) => {
       arrayFrom(count).forEach(() => {
         nfts.push(getNftIn(item, erc, count));
       });
+      if (approveTx[contract]) {
+        nfts.push(getNftApprove(item, approveTx[contract]));
+        delete approveTx[contract];
+      }
     } else {
       // out
       if (!(erc.functionName || "").toLocaleLowerCase().includes("stake")) {
@@ -242,11 +281,13 @@ export const calcAmount = (value: any) => {
 export const flipsDtatistics = (data: any) => {
   let winFlips = 0;
   let loseFlips = 0;
-  let cost = 0; // 有用nft数量
+  let cost = 0; // 拥有nft数量
   let costSpend = new BN(0); // 拥有nft的花费
-  let totalSpend = new BN(0);
-  let totalProfits = new BN(0);
+  let totalSpend = new BN(0); // 总花费
+  let totalProfits = new BN(0); // 总盈利ETH花费
   let transfer = 0; // 转出nft数量
+  let approves = 0; // 授权次数
+  let approveSpend = new BN(0); // 授权消耗
 
   // 处理数据
   const datas = data.map((item: any) => {
@@ -259,7 +300,10 @@ export const flipsDtatistics = (data: any) => {
 
     totalSpend = totalSpend.plus(outGas).plus(inGas).plus(item.inValue);
 
-    if (item.type === "in") {
+    if (item.type === "approve") {
+      approves = approves + item.count;
+      approveSpend = inAmount.plus(approveSpend);
+    } else if (item.type === "in") {
       cost += 1;
       costSpend = costSpend.plus(inAmount).plus(inGas);
     } else if (item.outType === "transfer out") {
@@ -289,9 +333,11 @@ export const flipsDtatistics = (data: any) => {
     transfer,
     winFlips,
     loseFlips,
+    approves,
+    approveSpend,
     totalSpend: totalSpend.minus(costSpend),
-    totalProfits,
-    dataSources: datas.reverse(),
+    totalProfits: totalProfits.minus(approveSpend),
+    dataSources: datas.filter((item: any) => item.type !== "approve").reverse(),
   };
 };
 
