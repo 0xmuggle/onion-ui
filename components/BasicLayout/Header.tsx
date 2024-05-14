@@ -4,7 +4,7 @@ import Link from "next/link";
 const menus: MenuItem[] = [
   {
     key: "item4",
-    label: "收藏",
+    label: "Twitter",
     render: () => (
       <a
         className="text-blue-500"

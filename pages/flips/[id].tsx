@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import flips, { flipsDtatistics } from "service/flips";
 import { Search, Statistics, SearchList, Filter } from "components/Home";
 import { isEmpty, pick, sortBy, throttle, uniq } from "lodash";
@@ -71,7 +71,7 @@ const Home: NextPage = ({ query }: any) => {
     );
   };
 
-  const loadData = async (address: string) => {
+  const loadData = async (address: string, chain: string) => {
     try {
       setLoading(true);
       setList([]);
@@ -110,7 +110,7 @@ const Home: NextPage = ({ query }: any) => {
         address: addr,
         name: address,
       });
-      const data: any = await flips(addr.toLocaleLowerCase());
+      const data: any = await flips(addr.toLocaleLowerCase(), chain);
       setList(data);
       caclCollections(data, [], "", 0);
     } catch (e: any) {
