@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import classNames from "classnames";
 import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
@@ -7,12 +8,12 @@ import {
 import { isEmpty, uniq } from "lodash";
 import Link from "next/link";
 import { hideStr } from "utils/utils";
-import { TrashIcon } from "@heroicons/react/24/outline";
 
 const Search = ({ value, onChange }: any) => {
   const [caches, setCaches] = useState([]);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const [chain, setChain] = useState("");
 
   const loadCache = () => {
     setCaches(
@@ -20,11 +21,22 @@ const Search = ({ value, onChange }: any) => {
         (item: any) => item
       )
     );
+    setChain(localStorage.getItem("caches-chain") || "ether");
+  };
+
+  const changeChain = async (val: string) => {
+    if (loading) return;
+    localStorage.setItem("caches-chain", val);
+    setChain(val);
   };
 
   const doChange = async (val = address) => {
     try {
-      if (!val || loading) return;
+      let c: any = chain;
+      if (!c) {
+        c = localStorage.getItem("caches-chain");
+      }
+      if (!val || loading || !c) return;
       setLoading(true);
       const cachesAddr = JSON.parse(
         localStorage.getItem("caches-addr") || "[]"
@@ -36,7 +48,7 @@ const Search = ({ value, onChange }: any) => {
         )
       );
       loadCache();
-      await onChange?.(val.toLowerCase());
+      await onChange?.(val.toLowerCase(), c);
     } finally {
       setLoading(false);
     }
@@ -71,10 +83,28 @@ const Search = ({ value, onChange }: any) => {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="relative">
+        <div className="absolute bottom-0 left-0 top-0 flex cursor-pointer border-r">
+          <div
+            onClick={() => changeChain("ether")}
+            className={classNames("flex items-center p-2 opacity-40", {
+              "!opacity-100": chain === "ether",
+            })}
+          >
+            <img src={`/icons/eth.svg`} alt="" width={20} />
+          </div>
+          <div
+            onClick={() => changeChain("blast")}
+            className={classNames("flex items-center p-2 opacity-40", {
+              "!opacity-100": chain === "blast",
+            })}
+          >
+            <img src={`/icons/blast.svg`} alt="" width={20} />
+          </div>
+        </div>
         <input
           type="text"
           placeholder="输入ETH地址或者ENS"
-          className="input input-bordered w-full rounded-full pr-20"
+          className="input input-bordered w-full rounded-full pl-20 pr-20"
           value={address}
           onChange={doChangeAddress}
           onKeyDown={doKeyDown}

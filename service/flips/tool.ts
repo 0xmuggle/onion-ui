@@ -4,10 +4,14 @@ import { defaultAccount } from "./idb.d";
 
 export const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-const ETHERESCAN_API_KEY = "ZTCEJ9279MFUH58P6ZAVRQTZ2FJAF5K15G";
-
 const chainApi: any = {
   ether: "https://api.etherscan.io/api",
+  blast: "https://api.blastscan.io/api",
+};
+
+const ETHERESCAN_API_KEYs: any = {
+  ether: "ZTCEJ9279MFUH58P6ZAVRQTZ2FJAF5K15G",
+  blast: "J7D89FABGHFKEWTJBBJ2KTS89RNGHBZQB1",
 };
 
 const ERC20s = [
@@ -23,7 +27,7 @@ const query = async (params = {}, chain = "ether") => {
       offset: 10000,
       sort: "asc",
       ...params,
-      apiKey: ETHERESCAN_API_KEY,
+      apiKey: ETHERESCAN_API_KEYs[chain],
     },
   });
   return data.result || [];
@@ -50,30 +54,33 @@ export const queryAll = async (params = {}, chain = "ether") => {
   return list;
 };
 
-const queryERC20 = async (address: string, startblock = 1) => {
+const queryERC20 = async (address: string, startblock = 1, chain = "ether") => {
   let erc: any = [];
   for (let i = 0; i < ERC20s.length; i++) {
     const contractaddress = ERC20s[i];
-    const erc20 = await queryAll({
-      address,
-      contractaddress,
-      module: "account",
-      action: "tokentx",
-      startblock,
-    });
+    const erc20 = await queryAll(
+      {
+        address,
+        contractaddress,
+        module: "account",
+        action: "tokentx",
+        startblock,
+      },
+      chain
+    );
     erc = erc.concat(erc20);
   }
   return erc;
 };
 
 // 查询缓存数据
-export const queryCacheData = async (address: string) => {
+export const queryCacheData = async (address: string, chain: string) => {
   const [account, nfts721, txs, intxs, erc20] = await Promise.all([
-    db.getAccount(address),
-    db.queryNfts721(address),
-    db.queryTxs(address),
-    db.queryInTxs(address),
-    db.queryErc20s(address),
+    db.getAccount(address + chain),
+    db.queryNfts721(address + chain),
+    db.queryTxs(address + chain),
+    db.queryInTxs(address + chain),
+    db.queryErc20s(address + chain),
   ]);
   return {
     account,
@@ -84,7 +91,7 @@ export const queryCacheData = async (address: string) => {
   };
 };
 
-export const queryData = async (address: string) => {
+export const queryData = async (address: string, chain: string) => {
   // TODO cache
   // const {
   //   account: { nft721Block, txsBlock, intxsBlock, erc20Block, ...account },
@@ -93,39 +100,51 @@ export const queryData = async (address: string) => {
   const { nft721Block, txsBlock, intxsBlock, erc20Block, nft1155Block } =
     defaultAccount;
   // 查询721
-  const nfts721 = await queryAll({
-    address,
-    module: "account",
-    action: "tokennfttx",
-    startblock: nft721Block + 1,
-  });
+  const nfts721 = await queryAll(
+    {
+      address,
+      module: "account",
+      action: "tokennfttx",
+      startblock: nft721Block + 1,
+    },
+    chain
+  );
 
   // 查询1155
-  const nfts1155 = await queryAll({
-    address,
-    module: "account",
-    action: "token1155tx",
-    startblock: nft1155Block + 1,
-  });
+  const nfts1155 = await queryAll(
+    {
+      address,
+      module: "account",
+      action: "token1155tx",
+      startblock: nft1155Block + 1,
+    },
+    chain
+  );
 
   // 查询普通交易
-  const txs = await queryAll({
-    address,
-    module: "account",
-    action: "txlist",
-    startblock: txsBlock + 1,
-  });
+  const txs = await queryAll(
+    {
+      address,
+      module: "account",
+      action: "txlist",
+      startblock: txsBlock + 1,
+    },
+    chain
+  );
 
   // 查询内联交易
-  const intxs = await queryAll({
-    address,
-    module: "account",
-    action: "txlistinternal",
-    startblock: intxsBlock + 1,
-  });
+  const intxs = await queryAll(
+    {
+      address,
+      module: "account",
+      action: "txlistinternal",
+      startblock: intxsBlock + 1,
+    },
+    chain
+  );
 
   // 查询ERC20
-  const erc20 = await queryERC20(address, erc20Block + 1);
+  const erc20 = await queryERC20(address, erc20Block + 1, chain);
   // await Promise.all([
   //   db.putAccount({
   //     ...account,

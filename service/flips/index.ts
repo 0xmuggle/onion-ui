@@ -115,14 +115,14 @@ const getNftOut = (item: any, erc: any, count = 1) => {
   }
   return nft;
 };
-const queryNfts = async (address: string) => {
+const queryNfts = async (address: string, chain: string) => {
   const {
     nfts1155: cacheNfts1155,
     nfts721: cacheNfts721,
     erc20,
     intxs,
     txs,
-  } = await queryData(address);
+  } = await queryData(address, chain);
 
   const intxsMap: any = {};
   intxs.forEach((item: any) => {
